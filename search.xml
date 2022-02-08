@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>MachineLearning（二）</title>
+      <link href="/2022/02/05/MachineLearning2/"/>
+      <url>/2022/02/05/MachineLearning2/</url>
+      
+        <content type="html"><![CDATA[<h1 id="linear-regression">Linear regression</h1><p>对不同的<span class="math inline">\(x\)</span>，有：单变量，多元。<br> 对不用的<span class="math inline">\(y\)</span>，有：线性回归，广义线性回归。<br> 对任务而言，有：回归任务，分类任务。是通过不同的<span class="math inline">\(g(y)\)</span>实现的。即我们认为<span class="math inline">\(y\)</span>到<span class="math inline">\(x\)</span>是非线性的，同时坐标轴<span class="math inline">\(x\)</span>是线性的，所以, <span class="math display">\[y&lt;-(非线性g^{-1}(\cdot))-z&lt;-(线性回归)-x\]</span> <span class="math display">\[g(y)=f(x)\]</span> 在正常逻辑中，我们习惯<span class="math inline">\(y=g^{-1}(f(x))\)</span>。但是为了莫名其妙地强调“联系”，即<span class="math inline">\(g(y)=f(x)\)</span>。我们在逻辑回归中，<span class="math inline">\(g(y)\)</span>就为对数几率函数。</p><h3 id="单变量线性回归">1. 单变量线性回归</h3><p><span class="math display">\[y_i=wx_i+b\]</span></p><h3 id="多元线性回归">2. 多元线性回归</h3><p><span class="math inline">\(x\)</span>不是标量，是多维的 <span class="math display">\[y_i=\textbf{w}^T\textbf{x}_i+b=\hat{\textbf{w}}^T\hat{\textbf{x}}_i\]</span> 有最优解， <span class="math display">\[\hat{\textbf{w}}^*=(\textbf{X}^T\textbf{X})^{-1}\textbf{X}^T\textbf{y}\]</span></p><ul><li><p><span class="math inline">\(\textbf{X}^T\textbf{X}\)</span>满秩<br> <span class="math inline">\(\hat{\textbf{w}}^*\)</span>有唯一解。</p></li><li><p><span class="math inline">\(\textbf{X}^T\textbf{X}\)</span>不满秩<br> <span class="math inline">\(\hat{\textbf{w}}^*\)</span>有很多解。我们可以通过在目标函数中加入正则化项，选择出其中的某个解。</p></li></ul><h3 id="广义线性回归">3. 广义线性回归</h3><p><span class="math inline">\(x\)</span>与<span class="math inline">\(y\)</span>的关系可能是非线性的，那么我们先把<span class="math inline">\(y\)</span>用反非线性函数映射回来，再用<span class="math inline">\(x\)</span>去线性回归，即 <span class="math display">\[y=g^{-1}(\textbf{w}^T\textbf{x}+b)\]</span> <span class="math inline">\(g(\cdot)\)</span>叫link function。</p><h3 id="二分类">4. 二分类</h3><h4 id="a.-对数几率回归逻辑回归logistic-regression">a. 对数几率回归，逻辑回归，logistic regression</h4><p><span class="math display">\[g(y)=f(x)\Rightarrow ln\frac{y}{1-y}=\textbf{w}^T\textbf{x}+b\]</span></p><h4 id="b.-对数几率回归的概率版本">b. 对数几率回归的概率版本</h4><p>在对数几率回归中，<span class="math inline">\(g^{-1}(f(x))\)</span>直接输出为标签<span class="math inline">\(y\)</span>，<span class="math inline">\(g^{-1}(f(x))=y\)</span>。现在，我们可以多一步，先用连接函数+线性回归输出标签的概率<span class="math inline">\(g^{-1}(f(x))=P(y)\)</span>，原因无他，其一是因为logistic函数提供了一个<span class="math inline">\(P\approx1/2\)</span>，其二是因为logistic函数是单调的且只有一个分界点，说明限制了<span class="math inline">\(x\)</span>只有一个分界面。<span class="math inline">\(x\)</span>就是“抛硬币”，<span class="math inline">\(y\)</span>代表正反面，<span class="math inline">\(f(x)\)</span>将“抛硬币”这一行为变成numerical feature，<span class="math inline">\(P(y)\)</span>将“正反面，0或1”用概率模型去诠释，<span class="math inline">\(g^{-1}(\cdot)\)</span>是从<span class="math inline">\(f(x)\)</span>到<span class="math inline">\(P(y)\)</span>的数值mapping函数。</p><p>注意书中式(3.26)具有迷惑性：似然函数=期望。事实上，右边并不是期望，因为<span class="math inline">\(P(x;\beta)\)</span>实为<span class="math inline">\(\beta\)</span>的函数，而不是概率：<span class="math inline">\(P(y=1/0|x)\)</span></p><h4 id="c.-线性判别分析-linear-discriminant-analysis-lda">c. 线性判别分析 Linear Discriminant Analysis (LDA)</h4><p><font color=red>略过，具体看书</font></p><p>将数据投影到线，优化两个目标：1.同类数据尽可能近，2.异类数据中心尽可能远。用中心投影和协方差作为变量，构造<span class="math inline">\(J\)</span>， 再构造拉格朗日乘子法，算出最佳投影线<span class="math inline">\(w\)</span>。</p><p>将LDA用于多分类时，<span class="math inline">\(N\)</span>维数据可以最佳投影到<span class="math inline">\(N-1\)</span>维，所以LDA可以用于降维。</p><h3 id="多分类">5. 多分类</h3><p>多分类有三种：OvO， OvR，和MvM(<font color=red>略过，具体看书</font>)。</p><table><thead><tr class="header"><th>method</th><th>#二分类器</th><th>预测</th><th>缺点</th></tr></thead><tbody><tr class="odd"><td>OvO</td><td><span class="math inline">\(N(N-1)/2\)</span></td><td>丢进所有分类器，再投票</td><td></td></tr><tr class="even"><td>OvR</td><td><span class="math inline">\(N\)</span></td><td>丢进所有分类器，再投票</td><td>类别不平衡！</td></tr></tbody></table><h3 id="类别不平衡问题">6. 类别不平衡问题</h3><ol type="1"><li>对<span class="math inline">\(g(y)\)</span>进行再缩放</li><li>undersampling多的</li><li>oversampling少的（插值）</li><li>阈值移动,threshold-moving(<font color=red>略过，具体google</font>)</li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> Machine Learning </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Machine Learning </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Machine Learning （一）</title>
       <link href="/2022/02/03/MachineLearning/"/>
       <url>/2022/02/03/MachineLearning/</url>
