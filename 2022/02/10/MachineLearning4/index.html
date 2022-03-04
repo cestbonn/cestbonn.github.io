@@ -16,21 +16,21 @@
   <meta name="author" content="John Doe">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Zhihua Zhou, Chapter 3, review; Linear regression (univariate, multiple, generalized), bi-classification with LR (logistic, LDA), multi-classification with LR, unbalance classes">
+    <meta name="description" content="Zhihua Zhou, Chapter 7, review; Descriminative&#x2F;generative model,">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Machine Learning（二）">
-<meta property="og:url" content="https://cestbonn.github.io/2022/02/05/MachineLearning2/index.html">
+<meta property="og:title" content="Machine Learning（四）">
+<meta property="og:url" content="https://cestbonn.github.io/2022/02/10/MachineLearning4/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Zhihua Zhou, Chapter 3, review; Linear regression (univariate, multiple, generalized), bi-classification with LR (logistic, LDA), multi-classification with LR, unbalance classes">
+<meta property="og:description" content="Zhihua Zhou, Chapter 7, review; Descriminative&#x2F;generative model,">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-02-05T05:57:45.000Z">
-<meta property="article:modified_time" content="2022-02-11T03:47:50.918Z">
+<meta property="article:published_time" content="2022-02-11T03:08:15.000Z">
+<meta property="article:modified_time" content="2022-02-14T02:55:09.444Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Machine Learning">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>Machine Learning（二） - Hexo</title>
+  <title>Machine Learning（四） - Hexo</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -176,9 +176,9 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Machine Learning（二）">
+            <span class="h2" id="subtitle" title="Machine Learning（四）">
               
-                Machine Learning（二）
+                Machine Learning（四）
               
             </span>
 
@@ -188,8 +188,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-02-05 00:57" pubdate>
-        2022年2月5日 凌晨
+      <time datetime="2022-02-10 22:08" pubdate>
+        2022年2月10日 晚上
       </time>
     </span>
   
@@ -199,7 +199,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.6k 字
+      1.7k 字
     </span>
   
 
@@ -208,7 +208,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      14 分钟
+      15 分钟
     </span>
   
 
@@ -237,66 +237,58 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Machine Learning（二）</h1>
+            <h1 style="display: none">Machine Learning（四）</h1>
             
             <div class="markdown-body">
-              <h1 id="linear-regression">Linear regression</h1>
-<p>对不同的<span class="math inline">\(x\)</span>，有：单变量，多元。<br> 对不用的<span class="math inline">\(y\)</span>，有：线性回归，广义线性回归。<br> 对任务而言，有：回归任务，分类任务。是通过不同的<span class="math inline">\(g(y)\)</span>实现的。即我们认为<span class="math inline">\(y\)</span>到<span class="math inline">\(x\)</span>是非线性的，同时坐标轴<span class="math inline">\(x\)</span>是线性的，所以, <span class="math display">\[y&lt;-(非线性g^{-1}(\cdot))-z&lt;-(线性回归)-x\]</span> <span class="math display">\[g(y)=f(x)\]</span> 在正常逻辑中，我们习惯<span class="math inline">\(y=g^{-1}(f(x))\)</span>。但是为了莫名其妙地强调“联系”，即<span class="math inline">\(g(y)=f(x)\)</span>。我们在逻辑回归中，<span class="math inline">\(g(y)\)</span>就为对数几率函数。</p>
-<h3 id="单变量线性回归">1. 单变量线性回归</h3>
-<p><span class="math display">\[y_i=wx_i+b\]</span></p>
-<h3 id="多元线性回归">2. 多元线性回归</h3>
-<p><span class="math inline">\(x\)</span>不是标量，是多维的 <span class="math display">\[y_i=\textbf{w}^T\textbf{x}_i+b=\hat{\textbf{w}}^T\hat{\textbf{x}}_i\]</span> 有最优解， <span class="math display">\[\hat{\textbf{w}}^*=(\textbf{X}^T\textbf{X})^{-1}\textbf{X}^T\textbf{y}\]</span></p>
+              <h1 id="贝叶斯分类">贝叶斯分类</h1>
+<h2 id="理论基础">1. 理论基础</h2>
+<h2 id="极大似然估计">2. 极大似然估计</h2>
+<p>极大似然估计最大的理解不行就是<strong>似然</strong>这个东西，网上真的说的乱七八糟。先思考这样一个问题，</p>
+<p>给一个数据 <span class="math inline">\(x\)</span>，我们要求他的标签 <span class="math inline">\(y\)</span>。为了做到这个，我们对比<span class="math inline">\(P(y_i|x)\)</span>，选出使之最大的那个<span class="math inline">\(i\)</span>。根据贝叶斯公式我们有， <span class="math display">\[
+P(y|x)=\frac{P(y)P(x|y)}{P(x)}
+\]</span> 书上回说，我们把<span class="math inline">\(P(x|y)\)</span>叫做<strong>似然</strong>，并对其求导，解出它的参数，就得到最优模型了。 ### 频率学派与贝叶斯学派</p>
 <ul>
-<li><p><span class="math inline">\(\textbf{X}^T\textbf{X}\)</span>满秩<br> <span class="math inline">\(\hat{\textbf{w}}^*\)</span>有唯一解。</p></li>
-<li><p><span class="math inline">\(\textbf{X}^T\textbf{X}\)</span>不满秩<br> <span class="math inline">\(\hat{\textbf{w}}^*\)</span>有很多解。我们可以通过在目标函数中加入正则化项，选择出其中的某个解。</p></li>
+<li><p>频率学派认为上帝模型的参数是固定值</p></li>
+<li><p>贝叶斯学派认为上帝模型的参数是变化的</p></li>
 </ul>
-<h3 id="广义线性回归">3. 广义线性回归</h3>
-<p><span class="math inline">\(x\)</span>与<span class="math inline">\(y\)</span>的关系可能是非线性的，那么我们先把<span class="math inline">\(y\)</span>用反非线性函数映射回来，再用<span class="math inline">\(x\)</span>去线性回归，即 <span class="math display">\[
-y=g^{-1}(\textbf{w}^T\textbf{x}+b)
-\]</span> <span class="math inline">\(g(\cdot)\)</span>叫link function。</p>
-<h3 id="二分类">4. 二分类</h3>
-<h4 id="a.-对数几率回归逻辑回归logistic-regression">a. 对数几率回归，逻辑回归，logistic regression</h4>
-<p><span class="math display">\[g(y)=f(x)\Rightarrow ln\frac{y}{1-y}=\textbf{w}^T\textbf{x}+b\]</span></p>
-<h4 id="b.-对数几率回归的概率版本">b. 对数几率回归的概率版本</h4>
-<p>在对数几率回归中，<span class="math inline">\(g^{-1}(f(x))\)</span>直接输出为标签<span class="math inline">\(y\)</span>，<span class="math inline">\(g^{-1}(f(x))=y\)</span>。现在，我们可以多一步，先用连接函数+线性回归输出标签的概率<span class="math inline">\(g^{-1}(f(x))=P(y)\)</span>，原因无他，其一是因为logistic函数提供了一个<span class="math inline">\(P\approx1/2\)</span>，其二是因为logistic函数是单调的且只有一个分界点，说明限制了<span class="math inline">\(x\)</span>只有一个分界面。<span class="math inline">\(x\)</span>就是“抛硬币”，<span class="math inline">\(y\)</span>代表正反面，<span class="math inline">\(f(x)\)</span>将“抛硬币”这一行为变成numerical feature，<span class="math inline">\(P(y)\)</span>将“正反面，0或1”用概率模型去诠释，<span class="math inline">\(g^{-1}(\cdot)\)</span>是从<span class="math inline">\(f(x)\)</span>到<span class="math inline">\(P(y)\)</span>的数值mapping函数。</p>
-<p>注意书中式(3.26)具有迷惑性：似然函数=期望。事实上，右边并不是期望，因为<span class="math inline">\(P(x;\beta)\)</span>实为<span class="math inline">\(\beta\)</span>的函数，而不是概率：<span class="math inline">\(P(y=1/0|x)\)</span></p>
-<h4 id="c.-线性判别分析-linear-discriminant-analysis-lda">c. 线性判别分析 Linear Discriminant Analysis (LDA)</h4>
-<p><font color=red>略过，具体看书</font></p>
-<p>将数据投影到线，优化两个目标：1.同类数据尽可能近，2.异类数据中心尽可能远。用中心投影和协方差作为变量，构造<span class="math inline">\(J\)</span>， 再构造拉格朗日乘子法，算出最佳投影线<span class="math inline">\(w\)</span>。</p>
-<p>将LDA用于多分类时，<span class="math inline">\(N\)</span>维数据可以最佳投影到<span class="math inline">\(N-1\)</span>维，所以LDA可以用于降维。</p>
-<h3 id="多分类">5. 多分类</h3>
-<p>多分类有三种：OvO， OvR，和MvM(<font color=red>略过，具体看书</font>)。</p>
-<table>
-<thead>
-<tr class="header">
-<th>method</th>
-<th>#二分类器</th>
-<th>预测</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>OvO</td>
-<td><span class="math inline">\(N(N-1)/2\)</span></td>
-<td>丢进所有分类器，再投票</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>OvR</td>
-<td><span class="math inline">\(N\)</span></td>
-<td>丢进所有分类器，再投票</td>
-<td>类别不平衡！</td>
-</tr>
-</tbody>
-</table>
-<h3 id="类别不平衡问题">6. 类别不平衡问题</h3>
-<ol type="1">
-<li>对<span class="math inline">\(g(y)\)</span>进行再缩放</li>
-<li>undersampling多的</li>
-<li>oversampling少的（插值）</li>
-<li>阈值移动,threshold-moving(<font color=red>略过，具体google</font>)</li>
-</ol>
+<p>概率是一门通过采样来估计模型的学科。频率学派认为大数定理能帮我们完全窥探出模型。比如你买彩票，频率学派认为上帝给你一个参数为人品的概率模型，<span class="math inline">\(P(￥)=N(￥;renpin)\)</span>，你抽到的钱由<span class="math inline">\(N\)</span>确定，而<span class="math inline">\(N\)</span>由<span class="math inline">\(renpin\)</span>唯一确定。如果你买很多次，那么我们总能知道<span class="math inline">\(P(￥)\)</span>的样子，因为你每一次买，它都是不变的。</p>
+<p>而贝叶斯学派认为我们的采样p都不是。贝叶斯学派觉得每一次买彩票，<span class="math inline">\(P(￥)\)</span>都是变化的，所以我们的采样根本不可能看到模型真正的样子。</p>
+<ul>
+<li>后验概率：利用观测，猜测hidden</li>
+<li>先验概率：hidden自身的概率分布</li>
+<li>似然：知道hidden时，模型可能生成的数据的样子 贝叶斯分类器目标函数为最大化<strong>后验概率</strong>， <span class="math display">\[
+h^{\star}(x)=\operatorname*{arg\,max}_{c\in Y}\,{P(c|x)}
+\]</span></li>
+</ul>
+<h1 id="关于概率你所需要的一切">关于概率你所需要的一切</h1>
+<p>关于<strong>已知与未知的关系</strong>的建模，我们有三种方法。</p>
+<p>函数建模</p>
+<ul>
+<li><p>建模：建模数值函数，<span class="math inline">\(y=f(x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的直接mapping</p></li>
+<li><p>学习：从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span class="math inline">\(y=f(x;\theta^{\star})\)</span></p></li>
+</ul>
+<p>随机过程建模</p>
+<ul>
+<li><p>频率学派</p>
+<ul>
+<li><p>建模：建模随机采样过程，<span class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的间接mapping</p></li>
+<li><p>学习：用最大似然从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span class="math inline">\(y=\operatorname*{arg\,max}_{y\in Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
+</ul></li>
+<li><p>贝叶斯学派</p>
+<ul>
+<li><p>建模：建模随机采样过程，<span class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的间接mapping</p></li>
+<li><p>学习：用最大后验从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span class="math inline">\(y=\operatorname*{arg\,max}_{y\in Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
+</ul></li>
+</ul>
+<h2 id="频率学派">1. 频率学派</h2>
+<p>注意到，当我们在说<span class="math inline">\(P(y|x;\theta)\)</span>的时候，我们事实上在说<span class="math inline">\(f(y;\theta(x))\)</span>。因为<span class="math inline">\(P(y|x)\)</span>其实是<span class="math inline">\(P(y,x)\)</span>的边缘概率，所以当我们写出<span class="math inline">\(P(y|x)\)</span>的时候，<span class="math inline">\(x\)</span>已经是pdf中的参数了。就像在三维的<span class="math inline">\(P(y,x)\)</span>中垂直<span class="math inline">\(x\)</span>轴切蛋糕，每一个横截面都是不同的，而这样的不同是<span class="math inline">\(x\)</span>造成的，所以<span class="math inline">\(x\)</span>在<span class="math inline">\(P(y|x)\)</span>中是参数，为了更加明了，我们写成<span class="math inline">\(P(y|x;\theta)=f(y;\theta(x))\)</span>。</p>
+<p>分类问题的关键就是，我们需要从有限的 <span class="math inline">\(D\)</span> 中猜（学习）出<span class="math inline">\(P(y|x;\theta)\)</span>的完整模型，这样才能对任意数据 <span class="math inline">\(x_0\)</span> 计算 <span class="math inline">\(P(y|x_0;\theta^{\star})\)</span> 并进行 <span class="math inline">\(y\in Y\)</span> 的<span class="math inline">\(argmax\)</span>预测。我们有贝叶斯公式， <span class="math display">\[
+P(y|x_0;\theta)=\frac{P(y)P(x_0|y;\beta)}{P(x_0)}
+\]</span> 此处 <span class="math inline">\(y\)</span> 为变量，<span class="math inline">\(x_0\)</span> 为固定值。我们的目的就是为当前数据 <span class="math inline">\(x_0\)</span> 猜测其属于每一种标签 <span class="math inline">\(y\in Y\)</span> 的概率。</p>
+<p>再重申一遍，对每一个 <span class="math inline">\(\theta\)</span>, 我们要算出<span class="math inline">\([P(y_0|x_0;\theta), P(y_1|x_0;\theta), ..., P(y_Y|x_0;\theta)]\)</span></p>
 
             </div>
             <hr>
@@ -331,9 +323,9 @@ y=g^{-1}(\textbf{w}^T\textbf{x}+b)
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/02/08/MachineLearning3/">
+                      <a href="/2022/03/03/algorithmtalk1/">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Machine Learning（三）</span>
+                        <span class="hidden-mobile">Algorithm (一)</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -341,8 +333,8 @@ y=g^{-1}(\textbf{w}^T\textbf{x}+b)
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/02/03/MachineLearning/">
-                        <span class="hidden-mobile">Machine Learning（一）</span>
+                      <a href="/2022/02/08/MachineLearning3/">
+                        <span class="hidden-mobile">Machine Learning（三）</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

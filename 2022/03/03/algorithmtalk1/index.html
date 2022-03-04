@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/about_img.jpg">
+  <link rel="icon" href="/img/about_img.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Linear expectation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Algorithm (一)">
+<meta property="og:url" content="https://cestbonn.github.io/2022/03/03/algorithmtalk1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Linear expectation">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-03T18:42:40.000Z">
+<meta property="article:modified_time" content="2022-03-04T04:07:45.084Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Algorithm">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>Algorithm (一) - Hexo</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"cestbonn.github.io","root":"/","version":"1.8.14","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Cestbonn</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Algorithm (一)">
+              
+                Algorithm (一)
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-03-03 13:42" pubdate>
+        2022年3月3日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      5.2k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      44 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Algorithm (一)</h1>
+            
+            <div class="markdown-body">
+              <h1 id="linear-expectation">1. Linear expectation</h1>
+<p>指使用了indicator variable的技术。</p>
+<p><span class="math display">\[
+x_{ij}=\begin{cases}
+1 &amp; \text{ if } x_{ij}\\
+0 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<p>这样做的好处是，我们可以把概率问题转换为算数问题。比如，</p>
+<p><span class="math display">\[
+\mathbb{E}[X]=\sum_{ij}{\mathbb{E}[x_{ij}]}
+\]</span></p>
+<p><span class="math display">\[
+\mathbb{E}[x_{ij}]=1\times P(x_{ij})+0\times P(\neg x_{ij})=P(x_{ij})
+\]</span></p>
+<p>从而，</p>
+<p><span class="math display">\[
+\mathbb{E}[X]=\sum_{ij}{P(x_{ij})}
+\]</span></p>
+<p>如此，<span class="math inline">\(X\)</span>的期望就变成了各indicator的概率和。这给了任意问题一个feasible的解题模板。</p>
+<h2 id="in-quicksort">1.1. in QuickSort</h2>
+<p>我们知道，问题大小<span class="math inline">\(n\)</span>并不能唯一定义算法的time complexity。比如在quicksort中，worst-case在sorted input时发生。此时的时间复杂度为<span class="math inline">\(O(n^2)\)</span>。所以，</p>
+<ol type="1">
+<li>对于单一算法来说，我们有worst-case复杂度，<span class="math inline">\(T[n]=O(\text{worst case})\)</span></li>
+<li>对于单一算法来说，只有当不同输入有不同复杂度时，我们才有average复杂度。<span class="math inline">\(T_{avg}[n]=\mathbb{E}[T]\)</span>，其中<span class="math inline">\(T\)</span>是<span class="math inline">\(\{T_1,\ T_2,\ ...\ \}\)</span>的随机变量，对应不同的输入<span class="math inline">\(\{I_1,\ I_2,\ ...\ \}\)</span>，大小为<span class="math inline">\(N\)</span>。</li>
+</ol>
+<p>接下来我们计算quicksort的<span class="math inline">\(T_{avg}\)</span>。</p>
+<h3 id="a.-第一次尝试">a. 第一次尝试</h3>
+<p>假设任意输入序列<span class="math inline">\(I_t\)</span>，<span class="math inline">\(I_t[k]\)</span> 表示第 <span class="math inline">\(k\)</span> 个数。用 <span class="math inline">\(x_{ij}^t\)</span> 表示 <span class="math inline">\(I_t[i]\)</span> 与 <span class="math inline">\(I_t[j]\)</span> 是否进行比较。</p>
+<p><span class="math display">\[
+x_{ij}^t=\begin{cases}
+1 &amp; \text{ if }I_t[i] \text{ compares to } I_t[j] \\
+0 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<p>已知 <span class="math inline">\(T_t\)</span> 为算法在序列 <span class="math inline">\(I_i\)</span> 上对应的运行时间，我们有，</p>
+<p><span class="math display">\[
+T_t=\sum{x_{ij}^t}
+\]</span></p>
+<p>那么 <span class="math inline">\(T_{avg}\)</span> 就可以这样计算，其中假设<span class="math inline">\(I\)</span>为均匀分布，那么我们有<span class="math inline">\(P(T)=\frac{1}{N}\)</span>，</p>
+<p><span class="math display">\[
+T_{avg}=\frac{1}{N}\sum_t{T_t}=\frac{1}{N}\sum_t{\sum_{ij}{x_{ij}^t}}
+\]</span></p>
+<p>移动一下位置，</p>
+<p><span class="math display">\[
+T_{avg}=\sum_{ij}{\sum_{t}{\frac{x_{ij}^t}{N}}}
+\]</span></p>
+<p>那么问题来了，<span class="math inline">\(x_{ij}^t/N\)</span> 是什么东西？</p>
+<ol type="1">
+<li>首先 <span class="math inline">\(N\)</span> 是长度为 <span class="math inline">\(n\)</span> 的输入的个数，很明显，就是 <span class="math inline">\(n\)</span> 的全排列，即<span class="math inline">\(n!\)</span></li>
+<li><span class="math inline">\(x_{ij}^t\)</span> 是第<span class="math inline">\(t\)</span>个输入中，<span class="math inline">\(a[i]\)</span> 与 <span class="math inline">\(a[j]\)</span> 的indicator</li>
+<li><span class="math inline">\(x_{ij}^t/N\)</span> 就是在所有 <span class="math inline">\(N=n!\)</span> 个输入中，每个输入 <span class="math inline">\(I_t\)</span> 中 <span class="math inline">\(I_t[i]\)</span> 与 <span class="math inline">\(I_t[j]\)</span> 被比较的概率</li>
+</ol>
+<p><strong>显然，这是不可知的。</strong></p>
+<p>因为虽然我们定死了 <span class="math inline">\(i\)</span> 和 <span class="math inline">\(j\)</span> ，但是每个 <span class="math inline">\(I_t\)</span> 却是随机的，从而 <span class="math inline">\(I_t[i]\)</span> 与 <span class="math inline">\(I_t[j]\)</span> 是随机的，不可知的。那么，我们可不可以定死序列呢？答案是可以！</p>
+<h3 id="b.-第二次尝试">b. 第二次尝试</h3>
+<p>对于给定元素的，长度为 <span class="math inline">\(n\)</span> 的序列，我们一共有 <span class="math inline">\(n!\)</span> 中变形。<strong>但是最终的sorted squence却是唯一的！</strong> 这是一种固定序列，所以可以开始施展魔法，令</p>
+<p><span class="math display">\[
+x_{ij}^t=\begin{cases}
+1 &amp; \text{ if }O_t[i] \text{ compares to } O_t[j] \\
+0 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<p>表示sorted序列中第 <span class="math inline">\(i\)</span> 大的数和第 <span class="math inline">\(j\)</span> 大的数是否在 <span class="math inline">\(I_t\)</span> 中被比较。这也是合理的，因为在最终序列中，一对数也至多被比较一次。所以关于 <span class="math inline">\(T_{avg}\)</span> 的计算一切不变，我们接下来考虑 <span class="math inline">\(\sum_t{x_{ij}^t/N}\)</span> 是什么东西。</p>
+<p>这次就不用考虑了，<span class="math inline">\(\sum_t{x_{ij}^t/N}\)</span> 是两个数在所有算法处理所有输入时，被比较的概率。我们尤其要注意这个概率分母，它是可能的输入的个数。算法在<strong>一个</strong>输入上，二叉树是完全确定的。而这概率的随机性质，是随机排列带来的。我们要算的是，在所有<strong>排列</strong>中，哪些比较了 <span class="math inline">\(O_i\)</span> 和 <span class="math inline">\(O_j\)</span>，而哪些没有。</p>
+<p>很多地方只把它写作 <span class="math inline">\(P(x_{ij}=1)\)</span>，这就很模糊，是谁对谁的概率？如果我每次都选第<span class="math inline">\(1\)</span>个数做pivot，那么二叉树是确定的，哪来的概率？当我们在说 <span class="math inline">\(x_{ij}=1\)</span> 的可能性时，我们实际上是在说，在所有输入中，在这么多确定的二叉树中， <span class="math inline">\(x_{ij}=1\)</span> 的占比是多少。这就是为什么本文将expectation拆做sumation的原因。为了看清楚究竟是谁的期望。</p>
+<p>接下来我们来计算它，</p>
+<p>很明显，对任意一个算法流程来说，<span class="math inline">\(x_{ij}=1\)</span> 仅发生在pivot为 <span class="math inline">\(O_i\)</span> 或 <span class="math inline">\(O_j\)</span> 时；<span class="math inline">\(x_{ij}=0\)</span> 发生在pivot为 <span class="math inline">\([i:j]\)</span> 中的某数时。所以对所有算法流程这个随机过程来说，记 <span class="math inline">\(P(x_{ij}=1)\)</span> 为 <span class="math inline">\(x_{ij}^t=1\)</span> 在所有由 <span class="math inline">\(I_t\)</span> 生成的二叉树中出现的概率；<span class="math inline">\(x_{ij}=0\)</span> 亦然。我们有， <span class="math display">\[
+P(x_{ij}=1)=\sum_{t}{\frac{x_{ij}^t}{N}}=\frac{2}{j-i+1},\ \text{ if }i&lt;j\\
+\]</span></p>
+<p>因此，平均时间为， <span class="math display">\[
+T_{avg}=\sum_{ij}{\sum_{t}{\frac{x_{ij}^t}{N}}}=\sum_{i&lt;j}{\frac{2}{j-i+1}}
+\]</span></p>
+<p>放缩， <span class="math display">\[\begin{align}
+T_{avg}&amp;=\sum_{i&lt;j}{\frac{2}{j-i+1}}\\
+&amp;=\sum_{i}^{n-1}{\sum_{j=i+1}^n{\frac{2}{j-i+1}}}\\
+&amp;=\sum_{i}^{n-1}{\sum_{k}^{n-i+1}{\frac{2}{k}}}\\
+&amp;\leq 2n\sum_{i=1}^{n-1}{H_n}\\
+&amp;=2nH_n\in O(n\log n)
+\end{align}
+\]</span></p>
+<h3 id="c.-等等">c. 等等！</h3>
+<p>你会说，pivot为 <span class="math inline">\(O_i\)</span> 或 <span class="math inline">\(O_j\)</span> 时，也不代表它们被比较了啊。如果 <span class="math inline">\(O_i\)</span> 和 <span class="math inline">\(O_j\)</span> 提前就被划分到了两边，那么即使其中一个被选做了pivot，另一个也不可能会被比较到了！</p>
+<p>事实上错了。</p>
+<p>其实判断 <span class="math inline">\(x_{ij}\)</span> 时，我们考虑的是当pivot第一次落在闭区间<span class="math inline">\([O_i, O_j]\)</span>时，pivot是什么。如果是端点，那么 <span class="math inline">\(x_{ij}=1\)</span>；如果是中间，那么 <span class="math inline">\(x_{ij}=0\)</span> 。</p>
+<blockquote>
+<p>因为决定 <span class="math inline">\(O_i\)</span> 与 <span class="math inline">\(O_j\)</span> 是否被比较的机会只有一次。所谓 <span class="math inline">\(x_{ij}\)</span> 指的是这次机会中这两个数能否被比较。如果出现上述情况，说明这两个数已经错失了唯一的机会，<span class="math inline">\(x_{ij}=0\)</span>。接下来，即使其中一个被选做了pivot，假设是 <span class="math inline">\(O_i\)</span> ，那么事实上这个node与 <span class="math inline">\(x_{ij}\)</span> 已经无关。此时的 <span class="math inline">\(O_i\)</span> 只会是用来检查 <span class="math inline">\(x_{i-a,i+b}\)</span> 或者其他pair的嫁衣罢了。所以， <span class="math inline">\(x_{ij}\)</span> 只在第一次出现为 <span class="math inline">\(i\)</span>， <span class="math inline">\(j\)</span>， 或 <span class="math inline">\(i:j\)</span> 的pivot时被计算。</p>
+</blockquote>
+<p>我们接下来讨论为什么这个概率是 <span class="math inline">\(\frac{2}{j-i+1}\)</span> ，有两个子问题。</p>
+<h4 id="为什么-sum_tfracx_ijtn-这个在全体-t-上的summation会变成-frac2j-i1-n-去哪了">1. 为什么 <span class="math inline">\(\sum_{t}{\frac{x_{ij}^t}{N}}\)</span> 这个在全体 <span class="math inline">\(t\)</span> 上的summation，会变成 <span class="math inline">\(\frac{2}{j-i+1}\)</span> ？<span class="math inline">\(N\)</span> 去哪了?</h4>
+<p>我们知道 <span class="math inline">\(x_{ij}\)</span> 是确定值，而 <span class="math inline">\(x_{ij}^t\)</span> 被 <span class="math inline">\(t\)</span> 引入了随机性，从而出现了summation。所以，在分析 <span class="math inline">\(P(x_{ij}=1)\)</span> 时，我们想的不是 <span class="math inline">\(O_i\)</span> 与 <span class="math inline">\(O_j\)</span> 在某个算法流程中被比较，被选pivot。一个算法流程内是没有随机过程的！所以说是 <span class="math inline">\(2/n\)</span> 的更是错误，算法选pivot不是随机的！就像之前说的，我们是要想象 <span class="math inline">\(n!\)</span> 个二叉树，其中有多少，第一次出现了闭区间内的pivot。</p>
+<p>在所有二叉树中直接求解，自然就与 <span class="math inline">\(N\)</span> 无关；事实上，我们也无法知道 <span class="math inline">\(x_{ij}^t\)</span> 的分布，因为 <span class="math inline">\(t\)</span> 是随机的。我们只能知 <span class="math inline">\(\sum_{t}{\frac{x_{ij}^t}{N}}\)</span> 这个总和。</p>
+<h4 id="在所有二叉树中为什么这个总和是-frac2j-i1">2. 在所有二叉树中，为什么这个总和是 <span class="math inline">\(\frac{2}{j-i+1}\)</span>。</h4>
+<p>在所有的树中，我们必定要面临选择区间内的数。所以每一个树都有确定的 <span class="math inline">\(x_{ij}\)</span> 值。换句话说，假设<span class="math inline">\(i=1\)</span>，<span class="math inline">\(j=6\)</span>，那么每一棵树都必定会有pivot为这6个数的时刻。并且由于我们只算第一次，所以每一颗树中，这样的时刻是唯一的。那么现在问，这个<strong>第一时刻</strong>为1和6的概率是多少？你可能会说，<span class="math inline">\(\frac{1}{3}\)</span> 。但有个问题是，如何保证这样的时刻在所有的树这个集合中是均匀分布的呢？我们花两步证明</p>
+<blockquote>
+<p><strong>Lemma 1. 对长度为 <span class="math inline">\(l\)</span> 的所有 <span class="math inline">\(l!\)</span> 个排列输入，<span class="math inline">\(P(x_{1,l}=1)=\frac{2}{l}\)</span></strong><br> 证：因为分割会发生在第一步，我们的pivot不动，取第一个。所以<span class="math inline">\(x_{1,l}=1\)</span>的概率就是<span class="math inline">\(O_1\)</span>和<span class="math inline">\(O_l\)</span>出现在首位的概率，即， <span class="math display">\[\frac{2\times (l-1)!}{l!}=\frac{2}{l}\]</span>也可以不用这么麻烦，<span class="math inline">\(O_1\)</span>和<span class="math inline">\(O_l\)</span>等可能出现在所有位置，所以相加就是<span class="math inline">\(\frac{2}{l}\)</span></p>
+</blockquote>
+<blockquote>
+<p><strong>Lemma 2. 对长度为 <span class="math inline">\(n\)</span> 的所有 <span class="math inline">\(n!\)</span> 个排列输入，<span class="math inline">\(O\)</span> 中任意长度为 <span class="math inline">\(l\)</span> 的子序列的全排列必定被quicksort的子序列的子集包含，并且各排列的数量为<span class="math inline">\(\frac{n!}{l!}\)</span>，即均匀分布</strong><br> 证：情况a，如果 <span class="math inline">\(O_{1:l}\)</span> 的任意一数出现在输入的首位，则这样的输入对于任意一个数都同样多，则 <span class="math inline">\(x_{ij}\)</span> 均匀分布，<span class="math inline">\(O_{1:l}\)</span> 的排列也均匀分布。情况b，如果 <span class="math inline">\(O_{1:l}\)</span> 的任意一数没有出现在首位，那么这个包含 <span class="math inline">\(O_{1:l}\)</span> 的序列<span class="math inline">\(l\)</span>被划分到两边的case是一样多的，因为其余的数的排列是等可能的。在情况b下，直到子序列出现情况a，对 <span class="math inline">\(O_{1:l}\)</span> 的任意一数出现在输入的首位case又会是同样的增量。因为在任意分割中， <span class="math inline">\(O_{1:l}\)</span> 的全排列都是等可能的。所以 <span class="math inline">\(x_{ij}\)</span> 保持最开始的比例增长，比例始终不变；<span class="math inline">\(O_{1:l}\)</span> 的排列也保持均匀分布，所以各排列的数量为 <span class="math inline">\(\frac{n!}{l!}\)</span> 。</p>
+</blockquote>
+<h4 id="证">证：</h4>
+<p>现在，我们面对的是确定的已经发生的 <span class="math inline">\(n!\)</span> 个树。对每一对 <span class="math inline">\(ij\)</span> ，我们都能在每一个树里面找出pivot第一次落在闭区间内的那个节点，且该节点唯一。</p>
+<blockquote>
+<p>当前节点子序列的长度可能大于<span class="math inline">\(ij\)</span>的距离。你可能会此时认为pivot选取的概率与子序列的长度有关。实则不然，pivot的选取是确定的，已经被观测到的。再次重申，算法没有随机变量，输入才是随机变量。我们所作的就是选取出pivot落在闭区间时的节点，其余的早就被排除了。所以，这个子序列与长度为<span class="math inline">\(j-i+1\)</span>的序列<strong>没有区别</strong>。再者，这里我们取第一个数作为pivot，所以这种节点的子序列开头必属于 <span class="math inline">\(O_{i:j}\)</span></p>
+</blockquote>
+<p>根据Lemma 2，这种子序列所包含的 <span class="math inline">\(O_{i:j}\)</span> 排列呈均匀分布， 因此不影响排列间的概率（也是均匀分布）。我们从该唯一节点的子树继续开始算法，由Lemma 1得知，以<strong>等效长度</strong>为<span class="math inline">\(j-i+1\)</span>的序列的全排列进行quicksort，<span class="math inline">\(P(x_{ij}=1)=\frac{2}{j-i+1}\)</span>。证完了。</p>
+<h3 id="d.-拓展">d. 拓展</h3>
+<p>以上我们是固定算法，为deterministic quicksort，将Input作为随机变量（而且在这里均匀分布）。那么根据Yao's maxmin principle，当我们固定Input，在quick sort中引入随机变量（均匀），变成randomlized quicksort时，其期望时间与前者相等，也是 <span class="math inline">\(O(n\log n)\)</span> 。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Class/">Class</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Algorithm/">Algorithm</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/02/10/MachineLearning4/">
+                        <span class="hidden-mobile">Machine Learning（四）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+
+
+
+  
+
+  
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        loader: {
+          load: ['ui/lazy']
+        },
+        options: {
+          renderActions: {
+            findScript: [10, doc => {
+              document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                const display = !!node.type.match(/; *mode=display/);
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                const text = document.createTextNode('');
+                node.parentNode.replaceChild(text, node);
+                math.start = { node: text, delim: '', n: 0 };
+                math.end = { node: text, delim: '', n: 0 };
+                doc.math.push(math);
+              });
+            }, '', false],
+            insertedScript: [200, () => {
+              document.querySelectorAll('mjx-container').forEach(node => {
+                let target = node.parentNode;
+                if (target.nodeName.toLowerCase() === 'li') {
+                  target.parentNode.classList.add('has-jax');
+                }
+              });
+            }, '', false]
+          }
+        }
+      };
+    </script>
+
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" ></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

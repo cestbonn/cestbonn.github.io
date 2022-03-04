@@ -16,15 +16,15 @@
   <meta name="author" content="John Doe">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Zhihua Zhou, Chapter 2, review">
+    <meta name="description" content="Zhihua Zhou, Chapter 2, review；Overfitting，validation，model estimation (precision, recall, P-R, ROC, AUC, F1, F-macro&#x2F;micro), Hypothesis test (t-test, binomial test), bias, variance, noise.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Machine Learning（一）">
 <meta property="og:url" content="https://cestbonn.github.io/2022/02/03/MachineLearning/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Zhihua Zhou, Chapter 2, review">
+<meta property="og:description" content="Zhihua Zhou, Chapter 2, review；Overfitting，validation，model estimation (precision, recall, P-R, ROC, AUC, F1, F-macro&#x2F;micro), Hypothesis test (t-test, binomial test), bias, variance, noise.">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-02-04T01:54:23.000Z">
-<meta property="article:modified_time" content="2022-02-08T05:23:01.855Z">
+<meta property="article:modified_time" content="2022-02-11T03:51:03.399Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Machine Learning">
 <meta name="twitter:card" content="summary_large_image">
@@ -317,19 +317,19 @@
 </ul>
 <h2 id="binomial-test">2. binomial test</h2>
 <p>二项误差就更简单了。现在我们在测试集上只跑了一遍，只有一个<span class="math inline">\(\epsilon\)</span>，那么我们如何评估它和上帝模型的相似度呢？</p>
-<p>我们首先把它们变成“错误prediction的数量”。那么，<span class="math inline">\(\epsilon n\)</span>就是以<span class="math inline">\(\epsilon_0\)</span>为概率在测试集上采样的结果，而这个采样服从二项分布。于是，我们同样可以设置一个置信率，如果<span class="math inline">\(\epsilon n\)</span>小于这个置信率对应的错误prediction数量，说明上帝模型有<span class="math inline">\(1-\alpha\)</span>的概率产生比<span class="math inline">\(1-\alpha\)</span>对应的误差更小的误差。</p>
+<p>我们首先把它们变成“错误prediction的数量”。那么，<span class="math inline">\(\epsilon n\)</span>就是以<span class="math inline">\(\epsilon_0\)</span>为概率在测试集上采样的结果，而这个采样服从以<span class="math inline">\(\epsilon_0\)</span>为均值的二项分布。于是，我们同样可以设置一个置信率，如果<span class="math inline">\(\epsilon n\)</span>小于这个置信率对应的错误prediction数量，说明上帝模型有<span class="math inline">\(1-\alpha\)</span>的概率产生比<span class="math inline">\(1-\alpha\)</span>对应的误差更小的误差。</p>
 <p>但是我们不能卡在那个临界点，所以得往概率高的地方挪一挪。于是我们有，能在<span class="math inline">\(1-\alpha\)</span>的置信率下，相信模型A背后的泛化误差，等于上帝模型的误差<span class="math inline">\(\epsilon_0\)</span>。</p>
 <p>Step</p>
 <ul>
 <li>美好地yy一个<span class="math inline">\(\epsilon_0\)</span>。规定置信度<span class="math inline">\(1-\alpha\)</span>, 并由<span class="math inline">\(\epsilon_0\)</span>和<span class="math inline">\(\alpha\)</span>算出/查表得出<span class="math inline">\(\bar{\epsilon}_0\)</span>。</li>
 <li>如果<span class="math inline">\(\hat{\epsilon}_A\leq \bar{\epsilon}_0\)</span>，那么说明：我们可以以<span class="math inline">\(1-\alpha\)</span>的置信度认为模型A的泛化误差不会大于那个yy的<span class="math inline">\(\epsilon_0\)</span></li>
 </ul>
-<h2 id="bias-variance-noise">Bias, variance, noise</h2>
+<h2 id="bias-variance-noise">3. Bias, variance, noise</h2>
 <p><span class="math inline">\(y_D\)</span>是训练集真实label，<span class="math inline">\(y\)</span>是测试集真实label，<span class="math inline">\(f(x;D)\)</span>是模型在D上训练后在测试集上的预测label，<span class="math inline">\(\bar{f}(s)=\mathbb{E}_D[f(x;D)]\)</span>是算法的期望预测。</p>
 <ul>
 <li><p>Bias，算法的能力 <span class="math display">\[bias^2(x)=(\bar{f}(x)-y)^2\]</span></p></li>
 <li><p>Variance，数据在不同训练集中的分布平均度，即数据扰动 <span class="math display">\[var(x)=\mathbb{E}_D[(f(x;D)-\bar{f}(x))^2]\]</span></p></li>
-<li><p>Noise，训练的自生难度 <span class="math display">\[\epsilon^2=\mathbb{E}_D[(y_d-y)^2]\]</span></p></li>
+<li><p>Noise，训练的自身难度 <span class="math display">\[\epsilon^2=\mathbb{E}_D[(y_d-y)^2]\]</span></p></li>
 </ul>
 <p>模型的期望泛化误差可以计算为 <span class="math display">\[E(f;D)=\mathbb{E}_D[(f(x;D)-y_D)^2]=bias^2(x)+var(x)+\epsilon^2\]</span></p>
 <p>开始训练时模型拉跨，bias高，var低；过拟合后bias低，var高；泛化误差则是先高后低最后高。</p>
