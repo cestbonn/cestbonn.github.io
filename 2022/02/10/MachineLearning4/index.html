@@ -244,19 +244,33 @@
 <h2 id="理论基础">1. 理论基础</h2>
 <h2 id="极大似然估计">2. 极大似然估计</h2>
 <p>极大似然估计最大的理解不行就是<strong>似然</strong>这个东西，网上真的说的乱七八糟。先思考这样一个问题，</p>
-<p>给一个数据 <span class="math inline">\(x\)</span>，我们要求他的标签 <span class="math inline">\(y\)</span>。为了做到这个，我们对比<span class="math inline">\(P(y_i|x)\)</span>，选出使之最大的那个<span class="math inline">\(i\)</span>。根据贝叶斯公式我们有， <span class="math display">\[
+<p>给一个数据 <span class="math inline">\(x\)</span>，我们要求他的标签
+<span class="math inline">\(y\)</span>。为了做到这个，我们对比<span
+class="math inline">\(P(y_i|x)\)</span>，选出使之最大的那个<span
+class="math inline">\(i\)</span>。根据贝叶斯公式我们有， <span
+class="math display">\[
 P(y|x)=\frac{P(y)P(x|y)}{P(x)}
-\]</span> 书上回说，我们把<span class="math inline">\(P(x|y)\)</span>叫做<strong>似然</strong>，并对其求导，解出它的参数，就得到最优模型了。 ### 频率学派与贝叶斯学派</p>
+\]</span> 书上回说，我们把<span
+class="math inline">\(P(x|y)\)</span>叫做<strong>似然</strong>，并对其求导，解出它的参数，就得到最优模型了。
+### 频率学派与贝叶斯学派</p>
 <ul>
 <li><p>频率学派认为上帝模型的参数是固定值</p></li>
 <li><p>贝叶斯学派认为上帝模型的参数是变化的</p></li>
 </ul>
-<p>概率是一门通过采样来估计模型的学科。频率学派认为大数定理能帮我们完全窥探出模型。比如你买彩票，频率学派认为上帝给你一个参数为人品的概率模型，<span class="math inline">\(P(￥)=N(￥;renpin)\)</span>，你抽到的钱由<span class="math inline">\(N\)</span>确定，而<span class="math inline">\(N\)</span>由<span class="math inline">\(renpin\)</span>唯一确定。如果你买很多次，那么我们总能知道<span class="math inline">\(P(￥)\)</span>的样子，因为你每一次买，它都是不变的。</p>
-<p>而贝叶斯学派认为我们的采样p都不是。贝叶斯学派觉得每一次买彩票，<span class="math inline">\(P(￥)\)</span>都是变化的，所以我们的采样根本不可能看到模型真正的样子。</p>
+<p>概率是一门通过采样来估计模型的学科。频率学派认为大数定理能帮我们完全窥探出模型。比如你买彩票，频率学派认为上帝给你一个参数为人品的概率模型，<span
+class="math inline">\(P(￥)=N(￥;renpin)\)</span>，你抽到的钱由<span
+class="math inline">\(N\)</span>确定，而<span
+class="math inline">\(N\)</span>由<span
+class="math inline">\(renpin\)</span>唯一确定。如果你买很多次，那么我们总能知道<span
+class="math inline">\(P(￥)\)</span>的样子，因为你每一次买，它都是不变的。</p>
+<p>而贝叶斯学派认为我们的采样p都不是。贝叶斯学派觉得每一次买彩票，<span
+class="math inline">\(P(￥)\)</span>都是变化的，所以我们的采样根本不可能看到模型真正的样子。</p>
 <ul>
 <li>后验概率：利用观测，猜测hidden</li>
 <li>先验概率：hidden自身的概率分布</li>
-<li>似然：知道hidden时，模型可能生成的数据的样子 贝叶斯分类器目标函数为最大化<strong>后验概率</strong>， <span class="math display">\[
+<li>似然：知道hidden时，模型可能生成的数据的样子
+贝叶斯分类器目标函数为最大化<strong>后验概率</strong>， <span
+class="math display">\[
 h^{\star}(x)=\operatorname*{arg\,max}_{c\in Y}\,{P(c|x)}
 \]</span></li>
 </ul>
@@ -264,31 +278,75 @@ h^{\star}(x)=\operatorname*{arg\,max}_{c\in Y}\,{P(c|x)}
 <p>关于<strong>已知与未知的关系</strong>的建模，我们有三种方法。</p>
 <p>函数建模</p>
 <ul>
-<li><p>建模：建模数值函数，<span class="math inline">\(y=f(x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的直接mapping</p></li>
-<li><p>学习：从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
-<li><p>预测：<span class="math inline">\(y=f(x;\theta^{\star})\)</span></p></li>
+<li><p>建模：建模数值函数，<span
+class="math inline">\(y=f(x;\theta)\)</span>，实现已知 <span
+class="math inline">\(x\)</span> 与未知 <span
+class="math inline">\(y\)</span> 的直接mapping</p></li>
+<li><p>学习：从数据集<span
+class="math inline">\(D\)</span>中学习最佳<span
+class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span
+class="math inline">\(y=f(x;\theta^{\star})\)</span></p></li>
 </ul>
 <p>随机过程建模</p>
 <ul>
 <li><p>频率学派</p>
 <ul>
-<li><p>建模：建模随机采样过程，<span class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的间接mapping</p></li>
-<li><p>学习：用最大似然从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
-<li><p>预测：<span class="math inline">\(y=\operatorname*{arg\,max}_{y\in Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
+<li><p>建模：建模随机采样过程，<span
+class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span
+class="math inline">\(x\)</span> 与未知 <span
+class="math inline">\(y\)</span> 的间接mapping</p></li>
+<li><p>学习：用最大似然从数据集<span
+class="math inline">\(D\)</span>中学习最佳<span
+class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span
+class="math inline">\(y=\operatorname*{arg\,max}_{y\in
+Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
 </ul></li>
 <li><p>贝叶斯学派</p>
 <ul>
-<li><p>建模：建模随机采样过程，<span class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span class="math inline">\(x\)</span> 与未知 <span class="math inline">\(y\)</span> 的间接mapping</p></li>
-<li><p>学习：用最大后验从数据集<span class="math inline">\(D\)</span>中学习最佳<span class="math inline">\(\theta^{\star}\)</span></p></li>
-<li><p>预测：<span class="math inline">\(y=\operatorname*{arg\,max}_{y\in Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
+<li><p>建模：建模随机采样过程，<span
+class="math inline">\(P(y|x;\theta)\)</span>，实现已知 <span
+class="math inline">\(x\)</span> 与未知 <span
+class="math inline">\(y\)</span> 的间接mapping</p></li>
+<li><p>学习：用最大后验从数据集<span
+class="math inline">\(D\)</span>中学习最佳<span
+class="math inline">\(\theta^{\star}\)</span></p></li>
+<li><p>预测：<span
+class="math inline">\(y=\operatorname*{arg\,max}_{y\in
+Y}\,{P(y|x;\theta^{\star})}\)</span></p></li>
 </ul></li>
 </ul>
 <h2 id="频率学派">1. 频率学派</h2>
-<p>注意到，当我们在说<span class="math inline">\(P(y|x;\theta)\)</span>的时候，我们事实上在说<span class="math inline">\(f(y;\theta(x))\)</span>。因为<span class="math inline">\(P(y|x)\)</span>其实是<span class="math inline">\(P(y,x)\)</span>的边缘概率，所以当我们写出<span class="math inline">\(P(y|x)\)</span>的时候，<span class="math inline">\(x\)</span>已经是pdf中的参数了。就像在三维的<span class="math inline">\(P(y,x)\)</span>中垂直<span class="math inline">\(x\)</span>轴切蛋糕，每一个横截面都是不同的，而这样的不同是<span class="math inline">\(x\)</span>造成的，所以<span class="math inline">\(x\)</span>在<span class="math inline">\(P(y|x)\)</span>中是参数，为了更加明了，我们写成<span class="math inline">\(P(y|x;\theta)=f(y;\theta(x))\)</span>。</p>
-<p>分类问题的关键就是，我们需要从有限的 <span class="math inline">\(D\)</span> 中猜（学习）出<span class="math inline">\(P(y|x;\theta)\)</span>的完整模型，这样才能对任意数据 <span class="math inline">\(x_0\)</span> 计算 <span class="math inline">\(P(y|x_0;\theta^{\star})\)</span> 并进行 <span class="math inline">\(y\in Y\)</span> 的<span class="math inline">\(argmax\)</span>预测。我们有贝叶斯公式， <span class="math display">\[
+<p>注意到，当我们在说<span
+class="math inline">\(P(y|x;\theta)\)</span>的时候，我们事实上在说<span
+class="math inline">\(f(y;\theta(x))\)</span>。因为<span
+class="math inline">\(P(y|x)\)</span>其实是<span
+class="math inline">\(P(y,x)\)</span>的边缘概率，所以当我们写出<span
+class="math inline">\(P(y|x)\)</span>的时候，<span
+class="math inline">\(x\)</span>已经是pdf中的参数了。就像在三维的<span
+class="math inline">\(P(y,x)\)</span>中垂直<span
+class="math inline">\(x\)</span>轴切蛋糕，每一个横截面都是不同的，而这样的不同是<span
+class="math inline">\(x\)</span>造成的，所以<span
+class="math inline">\(x\)</span>在<span
+class="math inline">\(P(y|x)\)</span>中是参数，为了更加明了，我们写成<span
+class="math inline">\(P(y|x;\theta)=f(y;\theta(x))\)</span>。</p>
+<p>分类问题的关键就是，我们需要从有限的 <span
+class="math inline">\(D\)</span> 中猜（学习）出<span
+class="math inline">\(P(y|x;\theta)\)</span>的完整模型，这样才能对任意数据
+<span class="math inline">\(x_0\)</span> 计算 <span
+class="math inline">\(P(y|x_0;\theta^{\star})\)</span> 并进行 <span
+class="math inline">\(y\in Y\)</span> 的<span
+class="math inline">\(argmax\)</span>预测。我们有贝叶斯公式， <span
+class="math display">\[
 P(y|x_0;\theta)=\frac{P(y)P(x_0|y;\beta)}{P(x_0)}
-\]</span> 此处 <span class="math inline">\(y\)</span> 为变量，<span class="math inline">\(x_0\)</span> 为固定值。我们的目的就是为当前数据 <span class="math inline">\(x_0\)</span> 猜测其属于每一种标签 <span class="math inline">\(y\in Y\)</span> 的概率。</p>
-<p>再重申一遍，对每一个 <span class="math inline">\(\theta\)</span>, 我们要算出<span class="math inline">\([P(y_0|x_0;\theta), P(y_1|x_0;\theta), ..., P(y_Y|x_0;\theta)]\)</span></p>
+\]</span> 此处 <span class="math inline">\(y\)</span> 为变量，<span
+class="math inline">\(x_0\)</span> 为固定值。我们的目的就是为当前数据
+<span class="math inline">\(x_0\)</span> 猜测其属于每一种标签 <span
+class="math inline">\(y\in Y\)</span> 的概率。</p>
+<p>再重申一遍，对每一个 <span class="math inline">\(\theta\)</span>,
+我们要算出<span class="math inline">\([P(y_0|x_0;\theta),
+P(y_1|x_0;\theta), ..., P(y_Y|x_0;\theta)]\)</span></p>
 
             </div>
             <hr>

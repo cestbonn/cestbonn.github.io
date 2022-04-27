@@ -245,38 +245,106 @@
 <p>Iteration input:</p>
 <ol type="1">
 <li>current data set <span class="math inline">\(D\)</span></li>
-<li>current atrribute set <span class="math inline">\(A=\{a\}\)</span></li>
+<li>current atrribute set <span
+class="math inline">\(A=\{a\}\)</span></li>
 </ol>
 <p>check(出口):</p>
 <ol type="1">
-<li>if <span class="math inline">\(y(x)\)</span> for <span class="math inline">\(x\in D\)</span> are the same, return (node = leaf, label = <span class="math inline">\(y(x)\)</span>)<br> 所有样本有一样的label</li>
-<li>if <span class="math inline">\(A=\varnothing\)</span> or <span class="math inline">\(D.A\)</span> are the same, return (node = leaf, label = most(<span class="math inline">\(y(x)\)</span>))<br> 没有A可以继续划分了，划到头了；所有样本对于所有A中属性都有一样的值</li>
-<li>if <span class="math inline">\(D=\varnothing\)</span>, return (node = leaf, label = most(<span class="math inline">\(y(x)\)</span>) for <span class="math inline">\(x\in\)</span> node.parent)<br> <span class="math inline">\(D_v\)</span>为空集，说明没有样本有<span class="math inline">\(d.a=v\)</span>，所以把<span class="math inline">\(a_v\)</span>这个节点的label用<span class="math inline">\(a\)</span>的<span class="math inline">\(D\)</span>的most替代</li>
+<li>if <span class="math inline">\(y(x)\)</span> for <span
+class="math inline">\(x\in D\)</span> are the same, return (node = leaf,
+label = <span class="math inline">\(y(x)\)</span>)<br>
+所有样本有一样的label</li>
+<li>if <span class="math inline">\(A=\varnothing\)</span> or <span
+class="math inline">\(D.A\)</span> are the same, return (node = leaf,
+label = most(<span class="math inline">\(y(x)\)</span>))<br>
+没有A可以继续划分了，划到头了；所有样本对于所有A中属性都有一样的值</li>
+<li>if <span class="math inline">\(D=\varnothing\)</span>, return (node
+= leaf, label = most(<span class="math inline">\(y(x)\)</span>) for
+<span class="math inline">\(x\in\)</span> node.parent)<br> <span
+class="math inline">\(D_v\)</span>为空集，说明没有样本有<span
+class="math inline">\(d.a=v\)</span>，所以把<span
+class="math inline">\(a_v\)</span>这个节点的label用<span
+class="math inline">\(a\)</span>的<span
+class="math inline">\(D\)</span>的most替代</li>
 </ol>
-<p>注意，2和3会有一定的重合，不过仅在于<span class="math inline">\(V=2\)</span>的情况。如果<span class="math inline">\(V&gt;2\)</span>，比如<span class="math inline">\(v_1\)</span>和<span class="math inline">\(v_2\)</span>有值而<span class="math inline">\(v_3\)</span>没有，那么出口2就无效了，只能靠出口3。</p>
+<p>注意，2和3会有一定的重合，不过仅在于<span
+class="math inline">\(V=2\)</span>的情况。如果<span
+class="math inline">\(V&gt;2\)</span>，比如<span
+class="math inline">\(v_1\)</span>和<span
+class="math inline">\(v_2\)</span>有值而<span
+class="math inline">\(v_3\)</span>没有，那么出口2就无效了，只能靠出口3。</p>
 <p>Coding <figure class="highlight python"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -------------------------------------------------学习------------------------------------------------#</span><br><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">TreeGenerate</span>(<span class="hljs-params">D, A</span>):</span>                                 <br>    node = Node()                                       <span class="hljs-comment"># 生成当前node，可能是leaf可能是branch</span><br>    y_D = [Y[x] <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> D]                             <span class="hljs-comment"># y_D是D的标签</span><br>    a_D = [(x.a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> A) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> D]                 <span class="hljs-comment"># a_D是D中每一个x在A属性下的值，[tuple]</span><br>    <span class="hljs-keyword">if</span> y_D[<span class="hljs-number">1</span>:] == y_D[:-<span class="hljs-number">1</span>]:                             <span class="hljs-comment"># --------------------------------------------- </span><br>        node.<span class="hljs-built_in">type</span> = <span class="hljs-string">&#x27;leaf&#x27;</span>                              <span class="hljs-comment"># 出口1，D中所有x的label都一样，             </span><br>        node.label = y_D[<span class="hljs-number">0</span>]                             <span class="hljs-comment"># 把当前node标记为leaf，标签为x的label，返回空</span><br>        <span class="hljs-keyword">return</span>                                          <span class="hljs-comment"># --------------------------------------------- </span><br>    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(A)&lt;<span class="hljs-number">1</span> <span class="hljs-keyword">or</span> a_D[<span class="hljs-number">1</span>:] == a_D[:-<span class="hljs-number">1</span>]:                 <span class="hljs-comment"># 出口2，所有样本对于所有A中属性都有一样的值  </span><br>        node.<span class="hljs-built_in">type</span> = <span class="hljs-string">&#x27;leaf&#x27;</span>                              <span class="hljs-comment"># 即A中属性没有划分意义，不论怎样划，都会划在同一边</span><br>        node.label = stats.mode(y_D)[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]              <span class="hljs-comment"># 把当前node标记为leaf，标签为x的label，返回空</span><br>        <span class="hljs-keyword">return</span>                                          <span class="hljs-comment"># --------------------------------------------- </span><br>    <br>    a_op = FindOptimal(D, A)                            <span class="hljs-comment"># 找出最优a</span><br><br>    <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> a_op.v:                                    <span class="hljs-comment"># 对a中的每一个v，判断该节点是leaf还是branch</span><br>        D_v = Select(D, a_op, v)                        <span class="hljs-comment"># 在D中划分出a为v的子集D_v</span><br>        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(D_v)&lt;<span class="hljs-number">1</span>:                                  <span class="hljs-comment"># --------------------------------------------- </span><br>            node.<span class="hljs-built_in">type</span> = <span class="hljs-string">&#x27;leaf&#x27;</span>                          <span class="hljs-comment"># 出口3，如果子集为空，则将当前node标记为leaf</span><br>            node.label = stats.mode(D)[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]            <span class="hljs-comment"># 并且其label为D_v的父集合即D的most</span><br>            <span class="hljs-keyword">return</span>                                      <span class="hljs-comment"># --------------------------------------------- </span><br>        <span class="hljs-keyword">else</span>:                                           <span class="hljs-comment"># 进程push。将当前节点标记为branch</span><br>            node.<span class="hljs-built_in">type</span> = <span class="hljs-string">&#x27;branch&#x27;</span>                        <span class="hljs-comment"># 记录该node的判断标准</span><br>            node.judge = a_op                           <span class="hljs-comment"># 继续分割子集D_v，这里用chils的index代替v的取值，</span><br>            node.chils.append(TreeGenerate(D_v, A-a_op))<span class="hljs-comment"># 不然每个leaf也要加上v，很麻烦                                  </span><br>                                                        <span class="hljs-comment"># --------------------------------------------- </span><br>    <span class="hljs-keyword">return</span> node                                         <span class="hljs-comment"># 突破循环，返回树根</span><br><br>Tree = TreeGenerate(D, A)<br><span class="hljs-comment"># -------------------------------------------------预测------------------------------------------------#</span><br>node = Tree<br><span class="hljs-keyword">while</span> node.<span class="hljs-built_in">type</span> != <span class="hljs-string">&#x27;leaf&#x27;</span>:<br>    chils = node.chils<br>    judge = node.judge<br>    node = node.chils[d.a[judge]]<br></code></pre></td></tr></table></figure></p>
 <h3 id="节点选取决策树流派">2. 节点选取（决策树流派）</h3>
 <h4 id="a.-id3决策树">a. ID3决策树</h4>
-<p><span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in A}\,{Gain(D,a)}\]</span> 采用节点/属性with max information gain。D是当前的dataset，a为该节点/属性 <span class="math display">\[Gain(D, a)=Ent(D)-\sum_v{\frac{|D^v|}{|D|}Ent(D^v)}\]</span> 其中<span class="math inline">\(Ent\)</span>为信息熵，<span class="math inline">\(K\)</span>和<span class="math inline">\(K\)</span>为分类任务的Class的index和number，<span class="math inline">\(p_k\)</span>为<span class="math inline">\(k\)</span>类class的在当前数据集（<span class="math inline">\(D\)</span>或<span class="math inline">\(D^v\)</span>）中的占比， <span class="math display">\[Ent(D)=-\sum_k^K{p_k\log_2{p_k}}\]</span> 但是，information gain对具有多种取值的a，即<span class="math inline">\(v\)</span>数量大的<span class="math inline">\(a\)</span>有偏好。比如编号。所以我们发明了C4.5决策树。</p>
+<p><span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in
+A}\,{Gain(D,a)}\]</span> 采用节点/属性with max information
+gain。D是当前的dataset，a为该节点/属性 <span
+class="math display">\[Gain(D,
+a)=Ent(D)-\sum_v{\frac{|D^v|}{|D|}Ent(D^v)}\]</span> 其中<span
+class="math inline">\(Ent\)</span>为信息熵，<span
+class="math inline">\(K\)</span>和<span
+class="math inline">\(K\)</span>为分类任务的Class的index和number，<span
+class="math inline">\(p_k\)</span>为<span
+class="math inline">\(k\)</span>类class的在当前数据集（<span
+class="math inline">\(D\)</span>或<span
+class="math inline">\(D^v\)</span>）中的占比， <span
+class="math display">\[Ent(D)=-\sum_k^K{p_k\log_2{p_k}}\]</span>
+但是，information gain对具有多种取值的a，即<span
+class="math inline">\(v\)</span>数量大的<span
+class="math inline">\(a\)</span>有偏好。比如编号。所以我们发明了C4.5决策树。</p>
 <h4 id="b.-c4.5决策树">b. C4.5决策树</h4>
-<p>C4.5决策树先挑选出大于平均Gain的a，再从中选出Gain_Ratio最大的a， <span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in A}\,{Gain(D,a)\&amp;Gain\text{_}Ratio(D,a)}\]</span> <span class="math display">\[Gain\text{_}Ratio(D,a)=\frac{Gain(D,a)}{IV(a)}\]</span> <span class="math display">\[IV(a)=-\sum_{v=1}^V{\frac{|D^v|}{|D|}\log_2{\frac{|D^v|}{|D|}}}\]</span> 可以看到，Gain_Ratio对V，即属性a的取值范围做了惩戒：V越大，<span class="math inline">\(\sum\)</span>越负，<span class="math inline">\(IV(a)\)</span>越大，从而Gain_Ratio越小。</p>
+<p>C4.5决策树先挑选出大于平均Gain的a，再从中选出Gain_Ratio最大的a，
+<span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in
+A}\,{Gain(D,a)\&amp;Gain\text{_}Ratio(D,a)}\]</span> <span
+class="math display">\[Gain\text{_}Ratio(D,a)=\frac{Gain(D,a)}{IV(a)}\]</span>
+<span
+class="math display">\[IV(a)=-\sum_{v=1}^V{\frac{|D^v|}{|D|}\log_2{\frac{|D^v|}{|D|}}}\]</span>
+可以看到，Gain_Ratio对V，即属性a的取值范围做了惩戒：V越大，<span
+class="math inline">\(\sum\)</span>越负，<span
+class="math inline">\(IV(a)\)</span>越大，从而Gain_Ratio越小。</p>
 <h4 id="c.-cart决策树">c. CART决策树</h4>
-<p><span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in A}\,{Gini\text{_}index(D,a)}\]</span> <span class="math display">\[Gini\text{_}index(D,a)=\sum_{v=1}^V{\frac{|D^v|}{|D|}Gini(D^v)}\]</span> <span class="math display">\[Gini(D)=1-\sum_{k=1}^{|Y|}{p_k^2}\]</span></p>
+<p><span class="math display">\[a_*=\operatorname*{arg\,max}_{a\in
+A}\,{Gini\text{_}index(D,a)}\]</span> <span
+class="math display">\[Gini\text{_}index(D,a)=\sum_{v=1}^V{\frac{|D^v|}{|D|}Gini(D^v)}\]</span>
+<span
+class="math display">\[Gini(D)=1-\sum_{k=1}^{|Y|}{p_k^2}\]</span></p>
 <h4 id="d.-总结">d. 总结</h4>
-<p>可以发现，决策树选节点，就是对这个节点所划分出的各个集合中的样本进行分析：在ID3决策树中，我们对每个小集合算Gain，再weightedly加起来，作为当前a的Gain；在C4.5决策树中，a的Gain还要sacle一个惩罚项，而这个惩罚项也是基于每个小集合里的样本的label，再把惩罚项weightedly加起来，在sum level上惩罚a的Gain；在CART决策树，每个小集合用Gini index来评估，a的Gini index同样是小集合的Gini指数weightedly相加。</p>
-<p>对于任意数据集，我们有purity(<span class="math inline">\(D\)</span>)。在评估某一节点的时候，首先生成所有切割出的数据子集，再计算每个子集purity(<span class="math inline">\(D\)</span>)，最后做weighted sum并用以评估该节点。</p>
+<p>可以发现，决策树选节点，就是对这个节点所划分出的各个集合中的样本进行分析：在ID3决策树中，我们对每个小集合算Gain，再weightedly加起来，作为当前a的Gain；在C4.5决策树中，a的Gain还要sacle一个惩罚项，而这个惩罚项也是基于每个小集合里的样本的label，再把惩罚项weightedly加起来，在sum
+level上惩罚a的Gain；在CART决策树，每个小集合用Gini index来评估，a的Gini
+index同样是小集合的Gini指数weightedly相加。</p>
+<p>对于任意数据集，我们有purity(<span
+class="math inline">\(D\)</span>)。在评估某一节点的时候，首先生成所有切割出的数据子集，再计算每个子集purity(<span
+class="math inline">\(D\)</span>)，最后做weighted
+sum并用以评估该节点。</p>
 <h3 id="pruning">3. Pruning</h3>
 <h4 id="a.-预剪枝-prepruning">a. 预剪枝 prepruning</h4>
-<p>基于决策树准则选出<span class="math inline">\(a^{\ast}\)</span>，如果验证集在当前决策树中精度下降，拒绝则<span class="math inline">\(a^{\ast}\)</span>。同时也不在当前node上继续寻找<span class="math inline">\(a^{\ast}\)</span>，而是直接将其标记为leaf，并检查下一个node。</p>
+<p>基于决策树准则选出<span
+class="math inline">\(a^{\ast}\)</span>，如果验证集在当前决策树中精度下降，拒绝则<span
+class="math inline">\(a^{\ast}\)</span>。同时也不在当前node上继续寻找<span
+class="math inline">\(a^{\ast}\)</span>，而是直接将其标记为leaf，并检查下一个node。</p>
 <h4 id="b.-后剪枝-postpruning">b. 后剪枝 postpruning</h4>
-<p>生成完整的决策树，自底向上取节点<span class="math inline">\(a\)</span>，如若不对<span class="math inline">\(a\)</span>进行划分，即采用多数原则，如果验证集精度上升，则取消节点<span class="math inline">\(a\)</span>。</p>
+<p>生成完整的决策树，自底向上取节点<span
+class="math inline">\(a\)</span>，如若不对<span
+class="math inline">\(a\)</span>进行划分，即采用多数原则，如果验证集精度上升，则取消节点<span
+class="math inline">\(a\)</span>。</p>
 <h3 id="连续值">4. 连续值</h3>
-<p>bi-partition，子集不再以<span class="math inline">\(a\)</span>的值划分，而是1.先以相邻的<span class="math inline">\(a\)</span>的值的均值为划分点s，2.再在数据集<span class="math inline">\(D\)</span>上划分<span class="math inline">\(D_+\)</span>和<span class="math inline">\(D_-\)</span>。</p>
-<p>需要注意的是，连续值<span class="math inline">\(a\)</span>可以出现在子树中，从而进一步减小或者增大。</p>
+<p>bi-partition，子集不再以<span
+class="math inline">\(a\)</span>的值划分，而是1.先以相邻的<span
+class="math inline">\(a\)</span>的值的均值为划分点s，2.再在数据集<span
+class="math inline">\(D\)</span>上划分<span
+class="math inline">\(D_+\)</span>和<span
+class="math inline">\(D_-\)</span>。</p>
+<p>需要注意的是，连续值<span
+class="math inline">\(a\)</span>可以出现在子树中，从而进一步减小或者增大。</p>
 <h3 id="缺失值">5. 缺失值</h3>
-<p>Key：对于属性a，如果遇到缺失样本，则将该样本(1份)按<span class="math inline">\(\frac{|D^v|}{|D^V|}\)</span>的比例划分到各个<span class="math inline">\(D^v\)</span>中(frac份)。</p>
+<p>Key：对于属性a，如果遇到缺失样本，则将该样本(1份)按<span
+class="math inline">\(\frac{|D^v|}{|D^V|}\)</span>的比例划分到各个<span
+class="math inline">\(D^v\)</span>中(frac份)。</p>
 <h3 id="多变量决策树">6. 多变量决策树</h3>
-<p><strong>多变量</strong>的意思是每个节点不再是由单一属性<span class="math inline">\(a\)</span>划分，其实还是单一属性<span class="math inline">\(a\)</span>，不过是变成了<span class="math inline">\(a\)</span>的线性函数。</p>
+<p><strong>多变量</strong>的意思是每个节点不再是由单一属性<span
+class="math inline">\(a\)</span>划分，其实还是单一属性<span
+class="math inline">\(a\)</span>，不过是变成了<span
+class="math inline">\(a\)</span>的线性函数。</p>
 
             </div>
             <hr>
