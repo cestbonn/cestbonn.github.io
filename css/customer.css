@@ -1,0 +1,36 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4251004 */
+  src: url('//at.alicdn.com/t/c/font_4251004_kshlkatytu.woff2?t=1694618867303') format('woff2'),
+       url('//at.alicdn.com/t/c/font_4251004_kshlkatytu.woff?t=1694618867303') format('woff'),
+       url('//at.alicdn.com/t/c/font_4251004_kshlkatytu.ttf?t=1694618867303') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gscholar:before {
+  content: "\e601";
+}
+
+.parent-of-markdown-table-centered {
+  display: flex;
+  justify-content: center;
+}
+
+/* 让Markdown中的表格整体居中 */
+.markdown-table-centered {
+  /* 该部分可能不需要任何特定的宽度或外边距设置了 */
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,617 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="To train a model, we follows two steps:  Build dataset:   For well defined dataset, use datasets library. For customized dataset, build it as a dict and then map to datasets.Dataset.   Use Dataset.map">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Train a model (backward)">
+<meta property="og:url" content="http://example.com/2023/09/14/train_a_model/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="To train a model, we follows two steps:  Build dataset:   For well defined dataset, use datasets library. For customized dataset, build it as a dict and then map to datasets.Dataset.   Use Dataset.map">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-09-14T11:00:00.000Z">
+<meta property="article:modified_time" content="2023-09-15T01:44:35.160Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="NLP">
+<meta property="article:tag" content="hugging face">
+<meta property="article:tag" content="code tutorial">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Train a model (backward) - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/customer.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.5-a","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Can Zheng</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Train a model (backward)</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-09-14 19:00" pubdate>
+          September 14, 2023 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Train a model (backward)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>To train a model, we follows two steps:</p>
+<ul>
+<li><strong>Build dataset</strong>:  <ul>
+<li>For <a href="#load-from-hugging-face-datasets">well defined dataset</a>, use <code>datasets</code> library.</li>
+<li>For <a href="#customized-dataset">customized dataset</a>, build it as a <code>dict</code> and then map to <code>datasets.Dataset</code>.  </li>
+<li>Use <code>Dataset.map(tokenizer_func)</code> to <a href="/2023/09/14/tokenizer/" title="Tokenizer">tokenize and truncate</a> , basic usage can be found <a href="#dataset-basic">here</a> and more in <a target="_blank" rel="noopener" href="https://huggingface.co/docs/datasets/process">link</a>; Use <code>DataCollatorWithPadding</code> to pad.</li>
+</ul>
+</li>
+<li><strong>Train</strong>:  <ul>
+<li>For <a href="#use-hugging-face-trainer">quick fine tuning</a>, use <code>Trainer</code>; Use <code>evaluate</code> to quick evaluate.</li>
+<li>For <a href="#manually-train">manually training</a>, more details can be implemented; Manually evaluate.</li>
+<li>Use <code>accelerate</code> to accelerate training.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Build-dataset"><a href="#Build-dataset" class="headerlink" title="Build dataset"></a>Build dataset</h2><p>row dataset –&gt; tokenized –&gt; padded</p>
+<h3 id="Customized-dataset"><a href="#Customized-dataset" class="headerlink" title="Customized dataset"></a>Customized dataset</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># Step 1. Build dataset as a dict.</span><br><br>Mydataset = &#123;<span class="hljs-string">&#x27;labels&#x27;</span>: [<span class="hljs-number">1</span>,<span class="hljs-number">0</span>], <span class="hljs-string">&#x27;text&#x27;</span>: [<span class="hljs-string">&#x27;how are you&#x27;</span>, <span class="hljs-string">&#x27;i&quot;m fine&#x27;</span>]&#125;<br><br><span class="hljs-comment"># Step 2. Transfer the dict dataset to hugging face `Dataset`.</span><br><br><span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> Dataset<br><br>Mydataset = Dataset.from_dict(Mydataset)<br><br><span class="hljs-comment"># Step 3. Tokenize dataset. Use map to do `batched` will be faster, </span><br><span class="hljs-comment"># and we do truncation in the mapping function.</span><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">tokenize_function</span>(<span class="hljs-params">example</span>):<br>    <span class="hljs-keyword">return</span> tokenizer(example[<span class="hljs-string">&quot;text&quot;</span>], truncation=<span class="hljs-literal">True</span>)<br><span class="hljs-comment"># `batched=True` is used for `DatasetDict`, allowing the function to be </span><br><span class="hljs-comment"># implemented in parallel across different sets, such as train and test.</span><br>Mydataset = Mydataset.<span class="hljs-built_in">map</span>(tokenize_function)<br>Mydataset = Mydataset.remove_columns([<span class="hljs-string">&#x27;text&#x27;</span>])<br><span class="hljs-comment"># Model can only accept columns: [&quot;attention_mask&quot;, &quot;input_ids&quot;, &quot;labels&quot;, &quot;token_type_ids&quot;]</span><br><br><span class="hljs-comment"># Step 4. Build `data_collator` for padding.</span><br><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> DataCollatorWithPadding<br><br>data_collator = DataCollatorWithPadding(tokenizer=tokenizer)<br></code></pre></td></tr></table></figure>
+
+<h3 id="Load-from-hugging-face-datasets"><a href="#Load-from-hugging-face-datasets" class="headerlink" title="Load from hugging face datasets"></a>Load from hugging face datasets</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> load_dataset<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, DataCollatorWithPadding<br><br>raw_datasets = load_dataset(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">tokenize_function</span>(<span class="hljs-params">example</span>):<br>    <span class="hljs-keyword">return</span> tokenizer(example[<span class="hljs-string">&quot;sentence1&quot;</span>], example[<span class="hljs-string">&quot;sentence2&quot;</span>], truncation=<span class="hljs-literal">True</span>)<br><br><br>Mydataset = raw_datasets.<span class="hljs-built_in">map</span>(tokenize_function, batched=<span class="hljs-literal">True</span>)<br>data_collator = DataCollatorWithPadding(tokenizer=tokenizer)<br></code></pre></td></tr></table></figure>
+
+<h3 id="Dataset-basic"><a href="#Dataset-basic" class="headerlink" title="Dataset basic"></a>Dataset basic</h3><ul>
+<li>use <code>.remove_columns([&quot;an attribute&quot;])</code> to remove columns</li>
+<li>use <code>.rename_column(&quot;current&quot;, &quot;target&quot;)</code> to rename columns</li>
+<li>use <code>.set_format(&quot;torch&quot;)</code> to output tensor instead of list</li>
+<li>use <code>.column_names</code> to get all keys&#x2F;columns</li>
+</ul>
+<h2 id="Train-and-evaluate"><a href="#Train-and-evaluate" class="headerlink" title="Train and evaluate"></a>Train and evaluate</h2><h3 id="Use-hugging-face-Trainer"><a href="#Use-hugging-face-Trainer" class="headerlink" title="Use hugging face Trainer"></a>Use hugging face Trainer</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># Step 1. Build TrainingArguments</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> TrainingArguments<br><br>training_args = TrainingArguments(<span class="hljs-string">&quot;test-trainer&quot;</span>, evaluation_strategy=<span class="hljs-string">&quot;epoch&quot;</span>)<br><br><span class="hljs-comment"># Step 2. Prepare model. Here we use the classification head for BERT,</span><br><span class="hljs-comment"># but BERT do not pre-trained that head.</span><br><span class="hljs-comment"># We will get a warming, but it is what we expect to do: tune a new head</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForSequenceClassification<br><br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=<span class="hljs-number">2</span>)<br><br><span class="hljs-comment"># Step 3. Build Trainer</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> Trainer<br><br>trainer = Trainer(<br>    model,<br>    training_args,<br>    train_dataset=Mydataset[<span class="hljs-string">&quot;train&quot;</span>],<br>    eval_dataset=Mydataset[<span class="hljs-string">&quot;validation&quot;</span>],<br>    data_collator=data_collator,<br>    tokenizer=tokenizer,<br>    compute_metrics=compute_metrics,<br>)<br><span class="hljs-comment"># This metrics will be calculated every `epoch` based on training_args</span><br><span class="hljs-comment"># Input is predictions on validation set</span><br><span class="hljs-comment"># Check the attribute of predictions !</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_metrics</span>(<span class="hljs-params">eval_preds</span>):<br>    logits, labels = eval_preds<br>    predictions = np.argmax(logits, axis=-<span class="hljs-number">1</span>)<br>    metric = any_metric(predictions=predictions, references=labels)<br>    <span class="hljs-keyword">return</span> metric<br><span class="hljs-comment"># For pre-defined metrics</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_metrics</span>(<span class="hljs-params">eval_preds</span>):<br>    logits, labels = eval_preds<br>    predictions = np.argmax(logits, axis=-<span class="hljs-number">1</span>)<br>    metric = evaluate.load(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>    <span class="hljs-keyword">return</span> metric.compute(predictions=predictions, references=labels)<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">trainer.train()<br></code></pre></td></tr></table></figure>
+
+<h3 id="Manually-train"><a href="#Manually-train" class="headerlink" title="Manually train"></a>Manually train</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AdamW<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForSequenceClassification<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> get_scheduler<br><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> tqdm.auto <span class="hljs-keyword">import</span> tqdm<br><span class="hljs-keyword">import</span> evaluate<br><span class="hljs-keyword">from</span> accelerate <span class="hljs-keyword">import</span> Accelerator<br><br><br><span class="hljs-comment"># Step 1. Build torch dataset.</span><br><span class="hljs-comment"># data_collator is also allowable for batch padding</span><br>train_dataloader = DataLoader(<br>    tokenized_datasets[<span class="hljs-string">&quot;train&quot;</span>], shuffle=<span class="hljs-literal">True</span>, batch_size=<span class="hljs-number">8</span>, collate_fn=data_collator<br>)<br>eval_dataloader = DataLoader(<br>    tokenized_datasets[<span class="hljs-string">&quot;validation&quot;</span>], batch_size=<span class="hljs-number">8</span>, collate_fn=data_collator<br>)<br><br><span class="hljs-comment"># Step 2. Load model</span><br>checkpoint = <span class="hljs-string">&#x27;bert-base-uncased&#x27;</span><br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=<span class="hljs-number">2</span>)<br><br><span class="hljs-comment"># Step 3. Prepare training</span><br>optimizer = AdamW(model.parameters(), lr=<span class="hljs-number">5e-5</span>)<br>num_epochs = <span class="hljs-number">3</span><br>num_training_steps = num_epochs * <span class="hljs-built_in">len</span>(train_dataloader)<br>lr_scheduler = get_scheduler(<br>    <span class="hljs-string">&quot;linear&quot;</span>,<br>    optimizer=optimizer,<br>    num_warmup_steps=<span class="hljs-number">0</span>,<br>    num_training_steps=num_training_steps,<br>)<br><span class="hljs-comment"># For normal training</span><br>device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span>) <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> torch.device(<span class="hljs-string">&quot;cpu&quot;</span>)<br>model.to(device)<br><span class="hljs-comment"># For accelerating training</span><br>accelerator = Accelerator()<br>train_dataloader, eval_dataloader, model, optimizer = accelerator.prepare(<br>    train_dataloader, eval_dataloader, model, optimizer<br>)<br><br><span class="hljs-comment"># Step 4. Train!</span><br>progress_bar = tqdm(<span class="hljs-built_in">range</span>(num_training_steps))<br>model.train()<br><span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_epochs):<br>    <span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> train_dataloader:<br>        <span class="hljs-comment"># Move to device in batch can save memory!</span><br>        batch = &#123;k: v.to(device) <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> batch.items()&#125;<br>        outputs = model(**batch)<br>        loss = outputs.loss<br>        <span class="hljs-comment"># For normal training</span><br>        loss.backward()<br>        <span class="hljs-comment"># For accelerate training, also remove the batch part where copy to GPU</span><br>        accelerator.backward(loss)<br><br>        optimizer.step()<br>        lr_scheduler.step()<br>        optimizer.zero_grad()<br>        progress_bar.update(<span class="hljs-number">1</span>)<br><br><span class="hljs-comment"># Step 5. Evaluate (well-defined dataset), just use `evaluate` library</span><br><span class="hljs-comment"># For customized dataset, calculate it manually.</span><br>metric = evaluate.load(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>model.<span class="hljs-built_in">eval</span>()<br><span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> eval_dataloader:<br>    batch = &#123;k: v.to(device) <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> batch.items()&#125;<br>    <span class="hljs-keyword">with</span> torch.no_grad():<br>        outputs = model(**batch)<br><br>    logits = outputs.logits<br>    predictions = torch.argmax(logits, dim=-<span class="hljs-number">1</span>)<br>    metric.add_batch(predictions=predictions, references=batch[<span class="hljs-string">&quot;labels&quot;</span>])<br><br>metric.compute()<br><br><br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/NLP-pipeline/" class="category-chain-item">NLP pipeline</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/NLP/" class="print-no-link">#NLP</a>
+      
+        <a href="/tags/hugging-face/" class="print-no-link">#hugging face</a>
+      
+        <a href="/tags/code-tutorial/" class="print-no-link">#code tutorial</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/09/14/implement_a_model/" title="Implement a model (forward)">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Implement a model (forward)</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/09/14/tokenizer/" title="Tokenizer">
+                        <span class="hidden-mobile">Tokenizer</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/customer.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

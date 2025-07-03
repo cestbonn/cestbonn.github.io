@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>Agent Workflow Design</title>
+    <link href="/2025/07/03/Agent-Workflow-Design/"/>
+    <url>/2025/07/03/Agent-Workflow-Design/</url>
+    
+    <content type="html"><![CDATA[<h2 id="Workflow-Design"><a href="#Workflow-Design" class="headerlink" title="Workflow Design"></a>Workflow Design</h2><h2 id="Tool"><a href="#Tool" class="headerlink" title="Tool"></a>Tool</h2><h3 id="edit-file"><a href="#edit-file" class="headerlink" title="edit_file"></a>edit_file</h3><p>edit_file需要用到两个内容：</p><ul><li>original content (从路径读取)</li><li>edited content with omissions (由LLM生成)</li></ul><p>然后把这两个内容输送给一个小LLM，得到完整的修改之后的content</p><p>经验教训</p><ul><li>不要使用start_line, end_line输出diff edit，行数往往不对，修改效果差</li></ul>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Implement a model (forward)</title>
+    <link href="/2023/09/14/implement_a_model/"/>
+    <url>/2023/09/14/implement_a_model/</url>
+    
+    <content type="html"><![CDATA[<h2 id="Forward-pipeline"><a href="#Forward-pipeline" class="headerlink" title="Forward pipeline"></a>Forward pipeline</h2><p>To implement a pre-trained model, one can use <code>pipeline</code></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> pipeline<br><br>classifier = pipeline(<span class="hljs-string">&quot;sentiment-analysis&quot;</span>, model=<span class="hljs-string">&#x27;bert-base-uncased&#x27;</span>)<br>raw_inputs = [<span class="hljs-string">&quot;I like this so much!&quot;</span>]<br>classifier(raw_inputs)<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>[&#123;<span class="hljs-string">&#x27;label&#x27;</span>: <span class="hljs-string">&#x27;POSITIVE&#x27;</span>, <span class="hljs-string">&#x27;score&#x27;</span>: <span class="hljs-number">0.9598047137260437</span>&#125;]<br></code></pre></td></tr></table></figure><p>The <code>pipeline</code> follows following steps.</p><h3 id="1-Tokenize"><a href="#1-Tokenize" class="headerlink" title="1. Tokenize"></a>1. Tokenize</h3><p>Input natural sentence; output token ids. Certainly, you can use specific tokenizer like <code>BertTokenizer</code>, but <code>AutoTokenizer</code> is more flexible when you don’t know the implemented model. Details and techs of tokenizer can be found at <a href="/2023/09/14/tokenizer/" title="Tokenizer">tokenizer</a>.</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer<br><br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br>inputs = tokenizer(raw_inputs, padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>)<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>inputs = &#123;<span class="hljs-string">&#x27;input_ids&#x27;</span>: tensor(<span class="hljs-built_in">list</span>), <br>              <span class="hljs-string">&#x27;attention_mask&#x27;</span>: tensor(<span class="hljs-built_in">list</span>)&#125;<br></code></pre></td></tr></table></figure><h3 id="2-Feed-to-model"><a href="#2-Feed-to-model" class="headerlink" title="2. Feed to model"></a>2. Feed to model</h3><p>Input token ids and attention mask; output hidden state. Similarly, we can use <code>BertModel</code>.</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModel<br><br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>model = AutoModel.from_pretrained(checkpoint)<br><span class="hljs-comment"># token ids-only inputs is allowed</span><br>outputs = model(**inputs)<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>hidden_state = outputs.last_hidden_state<br><span class="hljs-meta">&gt;&gt;&gt; </span>[batch size, sequence length, hidden size]<br></code></pre></td></tr></table></figure><h3 id="3-Feed-to-head"><a href="#3-Feed-to-head" class="headerlink" title="3. Feed to head"></a>3. Feed to head</h3><p>Input token ids and attention mask; output logits.<br>Notice: We need to use another model with <code>head</code> instead of model in previous step. Because the previous one is used to train a customized head, in this step, we can use the pre-trained head for a specific task.</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForSequenceClassification<br><br>checkpoint = <span class="hljs-string">&quot;bert-base&quot;</span><br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint)<br>outputs = model(**inputs)<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>outputs.logits.shape = torch.Size([num of sentence, num of classes])<br></code></pre></td></tr></table></figure><h3 id="4-Map-to-class"><a href="#4-Map-to-class" class="headerlink" title="4. Map to class"></a>4. Map to class</h3><p>Input logits; output class. To change logits to probability, we need <code>softmax</code>. We can use <code>model.config.id2lable</code> to get the inherit labeling attributes.</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">predictions = torch.nn.functional.softmax(outputs.logits, dim=-<span class="hljs-number">1</span>)<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>predictions.shape = torch.Size([num of sentence, num of classes])<br><br>model.config.id2label<br><br><span class="hljs-meta">&gt;&gt;&gt; </span>&#123;<span class="hljs-number">0</span>: <span class="hljs-string">&#x27;NEGATIVE&#x27;</span>, <span class="hljs-number">1</span>: <span class="hljs-string">&#x27;POSITIVE&#x27;</span>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP pipeline</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>hugging face</tag>
+      
+      <tag>code tutorial</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Train a model (backward)</title>
+    <link href="/2023/09/14/train_a_model/"/>
+    <url>/2023/09/14/train_a_model/</url>
+    
+    <content type="html"><![CDATA[<p>To train a model, we follows two steps:</p><ul><li><strong>Build dataset</strong>:  <ul><li>For <a href="#load-from-hugging-face-datasets">well defined dataset</a>, use <code>datasets</code> library.</li><li>For <a href="#customized-dataset">customized dataset</a>, build it as a <code>dict</code> and then map to <code>datasets.Dataset</code>.  </li><li>Use <code>Dataset.map(tokenizer_func)</code> to <a href="/2023/09/14/tokenizer/" title="Tokenizer">tokenize and truncate</a> , basic usage can be found <a href="#dataset-basic">here</a> and more in <a href="https://huggingface.co/docs/datasets/process">link</a>; Use <code>DataCollatorWithPadding</code> to pad.</li></ul></li><li><strong>Train</strong>:  <ul><li>For <a href="#use-hugging-face-trainer">quick fine tuning</a>, use <code>Trainer</code>; Use <code>evaluate</code> to quick evaluate.</li><li>For <a href="#manually-train">manually training</a>, more details can be implemented; Manually evaluate.</li><li>Use <code>accelerate</code> to accelerate training.</li></ul></li></ul><h2 id="Build-dataset"><a href="#Build-dataset" class="headerlink" title="Build dataset"></a>Build dataset</h2><p>row dataset –&gt; tokenized –&gt; padded</p><h3 id="Customized-dataset"><a href="#Customized-dataset" class="headerlink" title="Customized dataset"></a>Customized dataset</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># Step 1. Build dataset as a dict.</span><br><br>Mydataset = &#123;<span class="hljs-string">&#x27;labels&#x27;</span>: [<span class="hljs-number">1</span>,<span class="hljs-number">0</span>], <span class="hljs-string">&#x27;text&#x27;</span>: [<span class="hljs-string">&#x27;how are you&#x27;</span>, <span class="hljs-string">&#x27;i&quot;m fine&#x27;</span>]&#125;<br><br><span class="hljs-comment"># Step 2. Transfer the dict dataset to hugging face `Dataset`.</span><br><br><span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> Dataset<br><br>Mydataset = Dataset.from_dict(Mydataset)<br><br><span class="hljs-comment"># Step 3. Tokenize dataset. Use map to do `batched` will be faster, </span><br><span class="hljs-comment"># and we do truncation in the mapping function.</span><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">tokenize_function</span>(<span class="hljs-params">example</span>):<br>    <span class="hljs-keyword">return</span> tokenizer(example[<span class="hljs-string">&quot;text&quot;</span>], truncation=<span class="hljs-literal">True</span>)<br><span class="hljs-comment"># `batched=True` is used for `DatasetDict`, allowing the function to be </span><br><span class="hljs-comment"># implemented in parallel across different sets, such as train and test.</span><br>Mydataset = Mydataset.<span class="hljs-built_in">map</span>(tokenize_function)<br>Mydataset = Mydataset.remove_columns([<span class="hljs-string">&#x27;text&#x27;</span>])<br><span class="hljs-comment"># Model can only accept columns: [&quot;attention_mask&quot;, &quot;input_ids&quot;, &quot;labels&quot;, &quot;token_type_ids&quot;]</span><br><br><span class="hljs-comment"># Step 4. Build `data_collator` for padding.</span><br><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> DataCollatorWithPadding<br><br>data_collator = DataCollatorWithPadding(tokenizer=tokenizer)<br></code></pre></td></tr></table></figure><h3 id="Load-from-hugging-face-datasets"><a href="#Load-from-hugging-face-datasets" class="headerlink" title="Load from hugging face datasets"></a>Load from hugging face datasets</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> load_dataset<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, DataCollatorWithPadding<br><br>raw_datasets = load_dataset(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">tokenize_function</span>(<span class="hljs-params">example</span>):<br>    <span class="hljs-keyword">return</span> tokenizer(example[<span class="hljs-string">&quot;sentence1&quot;</span>], example[<span class="hljs-string">&quot;sentence2&quot;</span>], truncation=<span class="hljs-literal">True</span>)<br><br><br>Mydataset = raw_datasets.<span class="hljs-built_in">map</span>(tokenize_function, batched=<span class="hljs-literal">True</span>)<br>data_collator = DataCollatorWithPadding(tokenizer=tokenizer)<br></code></pre></td></tr></table></figure><h3 id="Dataset-basic"><a href="#Dataset-basic" class="headerlink" title="Dataset basic"></a>Dataset basic</h3><ul><li>use <code>.remove_columns([&quot;an attribute&quot;])</code> to remove columns</li><li>use <code>.rename_column(&quot;current&quot;, &quot;target&quot;)</code> to rename columns</li><li>use <code>.set_format(&quot;torch&quot;)</code> to output tensor instead of list</li><li>use <code>.column_names</code> to get all keys&#x2F;columns</li></ul><h2 id="Train-and-evaluate"><a href="#Train-and-evaluate" class="headerlink" title="Train and evaluate"></a>Train and evaluate</h2><h3 id="Use-hugging-face-Trainer"><a href="#Use-hugging-face-Trainer" class="headerlink" title="Use hugging face Trainer"></a>Use hugging face Trainer</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># Step 1. Build TrainingArguments</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> TrainingArguments<br><br>training_args = TrainingArguments(<span class="hljs-string">&quot;test-trainer&quot;</span>, evaluation_strategy=<span class="hljs-string">&quot;epoch&quot;</span>)<br><br><span class="hljs-comment"># Step 2. Prepare model. Here we use the classification head for BERT,</span><br><span class="hljs-comment"># but BERT do not pre-trained that head.</span><br><span class="hljs-comment"># We will get a warming, but it is what we expect to do: tune a new head</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForSequenceClassification<br><br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=<span class="hljs-number">2</span>)<br><br><span class="hljs-comment"># Step 3. Build Trainer</span><br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> Trainer<br><br>trainer = Trainer(<br>    model,<br>    training_args,<br>    train_dataset=Mydataset[<span class="hljs-string">&quot;train&quot;</span>],<br>    eval_dataset=Mydataset[<span class="hljs-string">&quot;validation&quot;</span>],<br>    data_collator=data_collator,<br>    tokenizer=tokenizer,<br>    compute_metrics=compute_metrics,<br>)<br><span class="hljs-comment"># This metrics will be calculated every `epoch` based on training_args</span><br><span class="hljs-comment"># Input is predictions on validation set</span><br><span class="hljs-comment"># Check the attribute of predictions !</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_metrics</span>(<span class="hljs-params">eval_preds</span>):<br>    logits, labels = eval_preds<br>    predictions = np.argmax(logits, axis=-<span class="hljs-number">1</span>)<br>    metric = any_metric(predictions=predictions, references=labels)<br>    <span class="hljs-keyword">return</span> metric<br><span class="hljs-comment"># For pre-defined metrics</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_metrics</span>(<span class="hljs-params">eval_preds</span>):<br>    logits, labels = eval_preds<br>    predictions = np.argmax(logits, axis=-<span class="hljs-number">1</span>)<br>    metric = evaluate.load(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>    <span class="hljs-keyword">return</span> metric.compute(predictions=predictions, references=labels)<br></code></pre></td></tr></table></figure><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">trainer.train()<br></code></pre></td></tr></table></figure><h3 id="Manually-train"><a href="#Manually-train" class="headerlink" title="Manually train"></a>Manually train</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AdamW<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForSequenceClassification<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> get_scheduler<br><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> tqdm.auto <span class="hljs-keyword">import</span> tqdm<br><span class="hljs-keyword">import</span> evaluate<br><span class="hljs-keyword">from</span> accelerate <span class="hljs-keyword">import</span> Accelerator<br><br><br><span class="hljs-comment"># Step 1. Build torch dataset.</span><br><span class="hljs-comment"># data_collator is also allowable for batch padding</span><br>train_dataloader = DataLoader(<br>    tokenized_datasets[<span class="hljs-string">&quot;train&quot;</span>], shuffle=<span class="hljs-literal">True</span>, batch_size=<span class="hljs-number">8</span>, collate_fn=data_collator<br>)<br>eval_dataloader = DataLoader(<br>    tokenized_datasets[<span class="hljs-string">&quot;validation&quot;</span>], batch_size=<span class="hljs-number">8</span>, collate_fn=data_collator<br>)<br><br><span class="hljs-comment"># Step 2. Load model</span><br>checkpoint = <span class="hljs-string">&#x27;bert-base-uncased&#x27;</span><br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=<span class="hljs-number">2</span>)<br><br><span class="hljs-comment"># Step 3. Prepare training</span><br>optimizer = AdamW(model.parameters(), lr=<span class="hljs-number">5e-5</span>)<br>num_epochs = <span class="hljs-number">3</span><br>num_training_steps = num_epochs * <span class="hljs-built_in">len</span>(train_dataloader)<br>lr_scheduler = get_scheduler(<br>    <span class="hljs-string">&quot;linear&quot;</span>,<br>    optimizer=optimizer,<br>    num_warmup_steps=<span class="hljs-number">0</span>,<br>    num_training_steps=num_training_steps,<br>)<br><span class="hljs-comment"># For normal training</span><br>device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span>) <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> torch.device(<span class="hljs-string">&quot;cpu&quot;</span>)<br>model.to(device)<br><span class="hljs-comment"># For accelerating training</span><br>accelerator = Accelerator()<br>train_dataloader, eval_dataloader, model, optimizer = accelerator.prepare(<br>    train_dataloader, eval_dataloader, model, optimizer<br>)<br><br><span class="hljs-comment"># Step 4. Train!</span><br>progress_bar = tqdm(<span class="hljs-built_in">range</span>(num_training_steps))<br>model.train()<br><span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_epochs):<br>    <span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> train_dataloader:<br>        <span class="hljs-comment"># Move to device in batch can save memory!</span><br>        batch = &#123;k: v.to(device) <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> batch.items()&#125;<br>        outputs = model(**batch)<br>        loss = outputs.loss<br>        <span class="hljs-comment"># For normal training</span><br>        loss.backward()<br>        <span class="hljs-comment"># For accelerate training, also remove the batch part where copy to GPU</span><br>        accelerator.backward(loss)<br><br>        optimizer.step()<br>        lr_scheduler.step()<br>        optimizer.zero_grad()<br>        progress_bar.update(<span class="hljs-number">1</span>)<br><br><span class="hljs-comment"># Step 5. Evaluate (well-defined dataset), just use `evaluate` library</span><br><span class="hljs-comment"># For customized dataset, calculate it manually.</span><br>metric = evaluate.load(<span class="hljs-string">&quot;glue&quot;</span>, <span class="hljs-string">&quot;mrpc&quot;</span>)<br>model.<span class="hljs-built_in">eval</span>()<br><span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> eval_dataloader:<br>    batch = &#123;k: v.to(device) <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> batch.items()&#125;<br>    <span class="hljs-keyword">with</span> torch.no_grad():<br>        outputs = model(**batch)<br><br>    logits = outputs.logits<br>    predictions = torch.argmax(logits, dim=-<span class="hljs-number">1</span>)<br>    metric.add_batch(predictions=predictions, references=batch[<span class="hljs-string">&quot;labels&quot;</span>])<br><br>metric.compute()<br><br><br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP pipeline</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>hugging face</tag>
+      
+      <tag>code tutorial</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Tokenizer</title>
+    <link href="/2023/09/14/tokenizer/"/>
+    <url>/2023/09/14/tokenizer/</url>
+    
+    <content type="html"><![CDATA[<h2 id="Types-of-tokenizer"><a href="#Types-of-tokenizer" class="headerlink" title="Types of tokenizer"></a>Types of tokenizer</h2><h3 id="1-subword-based"><a href="#1-subword-based" class="headerlink" title="1. subword-based"></a>1. subword-based</h3><p>hi</p><h2 id="Tokenizer-in-hugging-face"><a href="#Tokenizer-in-hugging-face" class="headerlink" title="Tokenizer in hugging face"></a>Tokenizer in hugging face</h2><h3 id="1-Basic-usage"><a href="#1-Basic-usage" class="headerlink" title="1. Basic usage"></a>1. Basic usage</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">sentence = <span class="hljs-string">&quot;Using a Transformer network is simple&quot;</span><br>tokens = tokenizer.tokenize(sentence)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-string">&#x27;Using&#x27;</span>, <span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;transform&#x27;</span>, <span class="hljs-string">&#x27;##er&#x27;</span>, <span class="hljs-string">&#x27;network&#x27;</span>, <span class="hljs-string">&#x27;is&#x27;</span>, <span class="hljs-string">&#x27;simple&#x27;</span>]<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-number">7993</span>, <span class="hljs-number">170</span>, <span class="hljs-number">11303</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">2443</span>, <span class="hljs-number">1110</span>, <span class="hljs-number">3014</span>]<br>decoded_string = tokenizer.decode(ids)<br><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">&#x27;Using a Transformer network is simple&#x27;</span><br></code></pre></td></tr></table></figure><p>For more details, check <a href="https://huggingface.co/docs/transformers/pad_truncation">hugging face tutorial</a> </p><h3 id="2-Single-sentence"><a href="#2-Single-sentence" class="headerlink" title="2. Single sentence"></a>2. Single sentence</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModelForSequenceClassification<br><br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint)<br><br>sequence = <span class="hljs-string">&quot;I like dog&quot;</span><br><br>tokens = tokenizer.tokenize(sequence)<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><br><span class="hljs-comment"># the model only allow batch input, so add one dimension for a single sentence</span><br>input_ids = torch.tensor([ids])<br>output = model(input_ids)<br></code></pre></td></tr></table></figure><h3 id="3-Batched-sentences"><a href="#3-Batched-sentences" class="headerlink" title="3. Batched sentences"></a>3. Batched sentences</h3><p>we can use <code>padding</code> to pad all sentence to the same length, which pads <code>tokenizer.pad_token_id</code> at the end of short sentences; Also, we must assign <code>0</code> at the padding position in <code>attention_mask</code> or the model will calculate the pad token and output wrong logits.</p><p>For more details, check <a href="https://huggingface.co/learn/nlp-course/zh-CN/chapter2/6?fw=pt">hugging face tutorial</a></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">inputs = tokenizer(batched_inputs, padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, max_sequence_length=<span class="hljs-number">100</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>)<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP pipeline</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>RoBERTa</title>
+    <link href="/2023/09/14/RoBERTa_code/"/>
+    <url>/2023/09/14/RoBERTa_code/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP model</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper code</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Attention is all you need</title>
+    <link href="/2023/09/14/attention_is_all_you_need/"/>
+    <url>/2023/09/14/attention_is_all_you_need/</url>
+    
+    <content type="html"><![CDATA[<h2 id="Structure-and-Code"><a href="#Structure-and-Code" class="headerlink" title="Structure and Code"></a>Structure and Code</h2><p>ss</p><h2 id="Pretrain"><a href="#Pretrain" class="headerlink" title="Pretrain"></a>Pretrain</h2><p>ss</p><h2 id="inferring"><a href="#inferring" class="headerlink" title="inferring"></a>inferring</h2><p>ss</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP paper</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper reading</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>T5</title>
+    <link href="/2023/09/14/T5_code/"/>
+    <url>/2023/09/14/T5_code/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP model</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper code</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>BART</title>
+    <link href="/2023/09/14/BART_code/"/>
+    <url>/2023/09/14/BART_code/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP model</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper code</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>BERT</title>
+    <link href="/2023/09/14/BERT_code/"/>
+    <url>/2023/09/14/BERT_code/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP model</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper code</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Development of Transformer</title>
+    <link href="/2023/09/14/development_of_transformer/"/>
+    <url>/2023/09/14/development_of_transformer/</url>
+    
+    <content type="html"><![CDATA[<div class="parent-of-markdown-table-centered"><div class="markdown-table-centered"><table><thead><tr><th align="center">2017</th><th align="center">2018</th><th align="center">2019</th><th align="center">2020</th><th align="center">2021</th><th align="center">2022</th><th align="center">2023</th></tr></thead><tbody><tr><td align="center"><a href="/2023/09/14/attention_is_all_you_need/" title="Attention is all you need">Transformer</a></td><td align="center">GPT<br>BERT, GPT-2</td><td align="center">DistilBERT<br>BART, T5</td><td align="center">GPT-3</td><td align="center"></td><td align="center">ChatGPT</td><td align="center">GPT-4</td></tr></tbody></table></div></div><center>Table 1. Development of transformer</center><br><p>Basically, models can be categorized into GPT-like (<strong>auto-regressive</strong>), BERT-like (<strong>auto-encoding</strong>), and BART&#x2F;T5-like (<strong>sequence-to-sequence</strong>).</p><ul><li><strong>Auto-encoding</strong><ul><li>Encoder-only; bidirectional attention.</li><li>ALBERT, <a href="/2023/09/14/BERT_code/" title="BERT">BERT</a>, DistilBERT, ELECTRA, <a href="/2023/09/14/RoBERTa_code/" title="RoBERTa">RoBERTa</a>.</li><li>Pretrain: mask words prediction.</li><li>Tasks: requiring an understanding of the full sentence; Sentence classification, NER (and more generally word classification), and extractive question answering.</li></ul></li><li><strong>Auto-regressive</strong>:  <ul><li>Decoder-only; directional attention.</li><li>CTRL, GPT, GPT-2, Transformer XL</li><li>Pretrain: next word prediction.</li><li>Tasks: text generation.</li></ul></li><li><strong>Sequence-to-sequence</strong><ul><li>Encoder-decoder; bidirectional + directional</li><li><a href="/2023/09/14/BART_code/" title="BART">BART</a>, mBART, Marian, <a href="/2023/09/14/T5_code/" title="T5">T5</a></li><li>Pretrain: mask a part of sentence, prediction</li><li>Tasks: generate based on inputs; Summarization, translation, or generative question answering</li></ul></li></ul>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
