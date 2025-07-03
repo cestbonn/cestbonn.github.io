@@ -46,6 +46,31 @@
   
   
   <entry>
+    <title>Tokenizer</title>
+    <link href="/2023/09/14/tokenizer/"/>
+    <url>/2023/09/14/tokenizer/</url>
+    
+    <content type="html"><![CDATA[<h2 id="Types-of-tokenizer"><a href="#Types-of-tokenizer" class="headerlink" title="Types of tokenizer"></a>Types of tokenizer</h2><h3 id="1-subword-based"><a href="#1-subword-based" class="headerlink" title="1. subword-based"></a>1. subword-based</h3><p>hi</p><h2 id="Tokenizer-in-hugging-face"><a href="#Tokenizer-in-hugging-face" class="headerlink" title="Tokenizer in hugging face"></a>Tokenizer in hugging face</h2><h3 id="1-Basic-usage"><a href="#1-Basic-usage" class="headerlink" title="1. Basic usage"></a>1. Basic usage</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">sentence = <span class="hljs-string">&quot;Using a Transformer network is simple&quot;</span><br>tokens = tokenizer.tokenize(sentence)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-string">&#x27;Using&#x27;</span>, <span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;transform&#x27;</span>, <span class="hljs-string">&#x27;##er&#x27;</span>, <span class="hljs-string">&#x27;network&#x27;</span>, <span class="hljs-string">&#x27;is&#x27;</span>, <span class="hljs-string">&#x27;simple&#x27;</span>]<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-number">7993</span>, <span class="hljs-number">170</span>, <span class="hljs-number">11303</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">2443</span>, <span class="hljs-number">1110</span>, <span class="hljs-number">3014</span>]<br>decoded_string = tokenizer.decode(ids)<br><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">&#x27;Using a Transformer network is simple&#x27;</span><br></code></pre></td></tr></table></figure><p>For more details, check <a href="https://huggingface.co/docs/transformers/pad_truncation">hugging face tutorial</a> </p><h3 id="2-Single-sentence"><a href="#2-Single-sentence" class="headerlink" title="2. Single sentence"></a>2. Single sentence</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModelForSequenceClassification<br><br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint)<br><br>sequence = <span class="hljs-string">&quot;I like dog&quot;</span><br><br>tokens = tokenizer.tokenize(sequence)<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><br><span class="hljs-comment"># the model only allow batch input, so add one dimension for a single sentence</span><br>input_ids = torch.tensor([ids])<br>output = model(input_ids)<br></code></pre></td></tr></table></figure><h3 id="3-Batched-sentences"><a href="#3-Batched-sentences" class="headerlink" title="3. Batched sentences"></a>3. Batched sentences</h3><p>we can use <code>padding</code> to pad all sentence to the same length, which pads <code>tokenizer.pad_token_id</code> at the end of short sentences; Also, we must assign <code>0</code> at the padding position in <code>attention_mask</code> or the model will calculate the pad token and output wrong logits.</p><p>For more details, check <a href="https://huggingface.co/learn/nlp-course/zh-CN/chapter2/6?fw=pt">hugging face tutorial</a></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">inputs = tokenizer(batched_inputs, padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, max_sequence_length=<span class="hljs-number">100</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>)<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP pipeline</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Train a model (backward)</title>
     <link href="/2023/09/14/train_a_model/"/>
     <url>/2023/09/14/train_a_model/</url>
@@ -75,16 +100,16 @@
   
   
   <entry>
-    <title>Tokenizer</title>
-    <link href="/2023/09/14/tokenizer/"/>
-    <url>/2023/09/14/tokenizer/</url>
+    <title>BART</title>
+    <link href="/2023/09/14/BART_code/"/>
+    <url>/2023/09/14/BART_code/</url>
     
-    <content type="html"><![CDATA[<h2 id="Types-of-tokenizer"><a href="#Types-of-tokenizer" class="headerlink" title="Types of tokenizer"></a>Types of tokenizer</h2><h3 id="1-subword-based"><a href="#1-subword-based" class="headerlink" title="1. subword-based"></a>1. subword-based</h3><p>hi</p><h2 id="Tokenizer-in-hugging-face"><a href="#Tokenizer-in-hugging-face" class="headerlink" title="Tokenizer in hugging face"></a>Tokenizer in hugging face</h2><h3 id="1-Basic-usage"><a href="#1-Basic-usage" class="headerlink" title="1. Basic usage"></a>1. Basic usage</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">sentence = <span class="hljs-string">&quot;Using a Transformer network is simple&quot;</span><br>tokens = tokenizer.tokenize(sentence)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-string">&#x27;Using&#x27;</span>, <span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;transform&#x27;</span>, <span class="hljs-string">&#x27;##er&#x27;</span>, <span class="hljs-string">&#x27;network&#x27;</span>, <span class="hljs-string">&#x27;is&#x27;</span>, <span class="hljs-string">&#x27;simple&#x27;</span>]<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><span class="hljs-meta">&gt;&gt;&gt; </span>[<span class="hljs-number">7993</span>, <span class="hljs-number">170</span>, <span class="hljs-number">11303</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">2443</span>, <span class="hljs-number">1110</span>, <span class="hljs-number">3014</span>]<br>decoded_string = tokenizer.decode(ids)<br><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">&#x27;Using a Transformer network is simple&#x27;</span><br></code></pre></td></tr></table></figure><p>For more details, check <a href="https://huggingface.co/docs/transformers/pad_truncation">hugging face tutorial</a> </p><h3 id="2-Single-sentence"><a href="#2-Single-sentence" class="headerlink" title="2. Single sentence"></a>2. Single sentence</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModelForSequenceClassification<br><br>checkpoint = <span class="hljs-string">&quot;bert-base-uncased&quot;</span><br>tokenizer = AutoTokenizer.from_pretrained(checkpoint)<br>model = AutoModelForSequenceClassification.from_pretrained(checkpoint)<br><br>sequence = <span class="hljs-string">&quot;I like dog&quot;</span><br><br>tokens = tokenizer.tokenize(sequence)<br>ids = tokenizer.convert_tokens_to_ids(tokens)<br><br><span class="hljs-comment"># the model only allow batch input, so add one dimension for a single sentence</span><br>input_ids = torch.tensor([ids])<br>output = model(input_ids)<br></code></pre></td></tr></table></figure><h3 id="3-Batched-sentences"><a href="#3-Batched-sentences" class="headerlink" title="3. Batched sentences"></a>3. Batched sentences</h3><p>we can use <code>padding</code> to pad all sentence to the same length, which pads <code>tokenizer.pad_token_id</code> at the end of short sentences; Also, we must assign <code>0</code> at the padding position in <code>attention_mask</code> or the model will calculate the pad token and output wrong logits.</p><p>For more details, check <a href="https://huggingface.co/learn/nlp-course/zh-CN/chapter2/6?fw=pt">hugging face tutorial</a></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">inputs = tokenizer(batched_inputs, padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, max_sequence_length=<span class="hljs-number">100</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>)<br></code></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[]]></content>
     
     
     <categories>
       
-      <category>NLP pipeline</category>
+      <category>NLP model</category>
       
     </categories>
     
@@ -92,6 +117,8 @@
     <tags>
       
       <tag>NLP</tag>
+      
+      <tag>paper code</tag>
       
     </tags>
     
@@ -103,6 +130,33 @@
     <title>RoBERTa</title>
     <link href="/2023/09/14/RoBERTa_code/"/>
     <url>/2023/09/14/RoBERTa_code/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>NLP model</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>NLP</tag>
+      
+      <tag>paper code</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>T5</title>
+    <link href="/2023/09/14/T5_code/"/>
+    <url>/2023/09/14/T5_code/</url>
     
     <content type="html"><![CDATA[]]></content>
     
@@ -146,60 +200,6 @@
       <tag>NLP</tag>
       
       <tag>paper reading</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>T5</title>
-    <link href="/2023/09/14/T5_code/"/>
-    <url>/2023/09/14/T5_code/</url>
-    
-    <content type="html"><![CDATA[]]></content>
-    
-    
-    <categories>
-      
-      <category>NLP model</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>NLP</tag>
-      
-      <tag>paper code</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>BART</title>
-    <link href="/2023/09/14/BART_code/"/>
-    <url>/2023/09/14/BART_code/</url>
-    
-    <content type="html"><![CDATA[]]></content>
-    
-    
-    <categories>
-      
-      <category>NLP model</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>NLP</tag>
-      
-      <tag>paper code</tag>
       
     </tags>
     
